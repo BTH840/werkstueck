@@ -1,12 +1,12 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {cameraPoint,boardCorners,rotatePoint} from './geometry.js';
+import {cameraPoint,boardCorners,rotatePoint,CAMERA_VIEWS} from './geometry.js';
 import {treeExample,treeLayout,normalizePhotoDraft,photoQuestions,photoValidation,photoModel,photoDraftFile,solidIntersections} from './photo-model.js';
 import {analysisRequest,analyzePhotos} from '../server/analysis.js';
 import {photoSVG} from './photo-art.js';
 const answered=()=>{const d=treeLayout(treeExample(),{width:60,thickness:18,angle:22.5,gap:220,baseLength:450});d.parts.forEach(p=>p.endCut='square');d.questions.forEach(q=>q.answer='Bestätigt am eigenen Entwurf; Originalrückseite unbekannt.');d.material='Trockenes Massivholz, Innenbereich';d.connection='Eigene Konstruktion. Verbindungen am Probebau prüfen; dieses Testmodell enthält keine ausgeführten Bohrungen.';d.geometryConfirmed=true;d.connectionConfirmed=true;return d;};
 test('camera preserves lengths, orthogonality and true rectangles in front view',()=>{
  const dot=(a,b)=>a.reduce((s,v,i)=>s+v*b[i],0);for(const yaw of[-2,-.7,0,1.2])for(const pitch of[-.5,0,.6,Math.PI/2]){const axes=[[1,0,0],[0,1,0],[0,0,1]].map(p=>cameraPoint(p,yaw,pitch));for(const a of axes)assert.ok(Math.abs(dot(a,a)-1)<1e-12);for(let i=0;i<3;i++)for(let j=i+1;j<3;j++)assert.ok(Math.abs(dot(axes[i],axes[j]))<1e-12);}
- assert.deepEqual(cameraPoint([200,60,18],0,0),[200,-60,18]);
+ assert.deepEqual(cameraPoint([200,60,18],0,0),[200,-60,18]);assert.ok(cameraPoint([100,0,0],...CAMERA_VIEWS.right)[2]>0);
  const p={size:[400,60,18],center:[0,0,0],rotationX:Math.PI/2,rotationY:Math.PI/2};const corners=boardCorners(p),edge=corners[1].map((v,i)=>v-corners[0][i]);assert.ok(Math.abs(Math.hypot(...edge)-400)<1e-9);assert.ok(Math.abs(edge[2]+400)<1e-9);
 });
 test('photo facts stay open until supplied and tree edits remain explicit proposals',()=>{
