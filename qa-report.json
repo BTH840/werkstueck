@@ -1,5 +1,5 @@
 {
-  "version": "0.2.0",
+  "version": "0.3.0",
   "reviewDate": "2026-11-09",
   "sourcesAreStatic": true,
   "projects": [
@@ -185,5 +185,34 @@
         }
       ]
     }
-  ]
+  ],
+  "workshop": {
+    "project": "garderobe",
+    "connection": "domino",
+    "tool": "Festool DOMINO DF 500 Q",
+    "steps": 24,
+    "defaultDowelPositions": [
+      100,
+      300,
+      500
+    ],
+    "axis": 9,
+    "depthSetting": 20,
+    "actualPocketDepth": 10,
+    "practicalBuild": false,
+    "sources": [
+      {
+        "title": "Festool DOMINO-Anwenderhandbuch · DF 500 Q, Einstellungen und Plattenverbindungen",
+        "url": "https://www.festool.ch/-/media/tts/fcp/festool/knowledge/downloads-page/download-brochures/manual_domino/manual_domino_system.pdf",
+        "note": "Abschnitte 1.4.4–1.4.9 und 4.9. Unsere Anrisse, Spannfolge und Garderobenmaße sind eigene Festlegungen."
+      },
+      {
+        "title": "Festool Originalbetriebsanleitung · aktuelle DF 500 RQ",
+        "url": "https://media.cdn.festool.io/productmedia/Images/attachment/d2e7333e-3714-11f0-8a62-005056b3ad01.pdf",
+        "note": "Ergänzende aktuelle Herstellerquelle. Die Beispielzeichnungen beziehen sich auf die DF 500 Q; Lochbreiten der Baureihen unterscheiden sich. Die Symbole und Betriebsanleitung deiner Maschine sind maßgeblich."
+      }
+    ],
+    "automatedTests": 19,
+    "browserPDFPages": 27
+  }
 }

@@ -1,6 +1,7 @@
 import {number,stepsFor,toolsFor} from './core.js';
+import {workshopFor} from './workshop.js';
 // All measurements and joinery come from the current model, not from static plan text.
-export async function createPlan(model,{full=false,images=[],version='0.2.0'}={}){
+export async function createPlan(model,{full=false,images=[],workshopImages=[],version='0.3.0'}={}){
  const {PDFDocument,StandardFonts,rgb}=globalThis.PDFLib,doc=await PDFDocument.create();
  const font=await doc.embedFont(StandardFonts.Helvetica),bold=await doc.embedFont(StandardFonts.HelveticaBold),serif=await doc.embedFont(StandardFonts.TimesRoman);
  const ink=rgb(.15,.24,.21),muted=rgb(.39,.43,.39),line=rgb(.83,.85,.81),accent=rgb(.67,.32,.18),M=40,W=595.28,H=841.89;let page,y;
@@ -13,7 +14,7 @@ export async function createPlan(model,{full=false,images=[],version='0.2.0'}={}
  };
  const heading=(s,size=19)=>{room(size*2+30);y-=8;text(s,{size,type:serif,leading:size*1.35});y-=5;};
  const image=async(src,height=150)=>{if(!src)return;const img=await doc.embedPng(src),fit=img.scaleToFit(W-M*2,height);room(fit.height+12);page.drawImage(img,{x:(W-fit.width)/2,y:y-fit.height,width:fit.width,height:fit.height});y-=fit.height+10;};
- const j=model.joinery,p=model.project;
+ const j=model.joinery,p=model.project,course=full?workshopFor(model):null;
  addPage();heading(p.short,29);text(`Außenmaße B × T × H: ${model.overall.map(n=>number(n/10,3)).join(' × ')} cm`,{size:10,type:bold});
  text(`${model.woodParts.length} Holzteile · Materialstärke ${number(model.dimensions.thickness)} mm · ${j.name}`,{size:9,color:muted});y-=8;
  text('ENTWURF - rechnerisch geprüft, noch nicht probegebaut. Keine bestätigte Tragfähigkeit.',{size:8,color:accent});y-=7;await image(images[0],130);
@@ -27,10 +28,21 @@ export async function createPlan(model,{full=false,images=[],version='0.2.0'}={}
  heading('Zusätzliches Material',16);for(const e of model.extras)text(`${number(e.quantity)} ${e.unit} · ${e.name}`,{size:9});if(!model.extras.length)text('Schleifmittel und Hilfsmittel passend zu Holz und Oberfläche.',{size:9});
  heading('Werkzeuge',16);text(toolsFor(model).join(' · '),{size:9});
  if(!full){addPage();heading('Die Montage im Überblick',25);for(const[i,s]of stepsFor(model).entries()){room(100);heading(`[ ] ${i+1}. ${s.title}`,16);text(s.text,{size:9.5});y-=4;text(s.check,{size:8.5,color:muted});y-=5;}}
+ else if(course){
+  for(const[i,s]of course.steps.entries()){
+   addPage();text(`WERKSTATTKURS · SCHRITT ${i+1} / ${course.steps.length} · ${s.phase.toLocaleUpperCase('de-DE')}`,{size:8,color:accent,type:bold});heading(s.title,24);
+   await image(workshopImages[i],212);text(s.caption,{size:7.5,color:muted});y-=9;
+   text('WERKZEUG & EINSTELLUNG',{size:8,type:bold});text(s.setting,{size:9.5});y-=5;
+   text('BEZUG & ANSATZ',{size:8,type:bold});text(s.reference,{size:9.5});y-=8;
+   for(const[k,action]of s.actions.entries()){text(`${k+1}. ${action}`,{size:9.5,leading:14});y-=5;}
+   y-=3;text('BEVOR DU WEITERGEHST',{size:8,type:bold});text(s.check,{size:9,color:muted,leading:13});y-=7;text('[ ] Schritt geprüft & erledigt',{size:9,type:bold});
+  }
+ }
  else{for(const[i,s]of stepsFor(model).entries()){addPage();text(`SCHRITT ${i+1} / ${stepsFor(model).length} · TEILE ${s.parts}`,{size:9,color:accent,type:bold});heading(s.title,27);y-=10;await image(images[i+1],245);y-=15;text(s.text,{size:12,leading:20});y-=15;heading('Vor dem nächsten Schritt prüfen',17);text(s.check,{size:10.5,leading:17});y-=18;text('[ ] Schritt erledigt',{size:11,type:bold});}}
  if(full)addPage();
  heading('Quelle und eigene Anpassung',15);text(p.source?.title||'Eigener Werkstück-Entwurf',{size:9,type:bold});if(p.source){text(p.source.url,{size:7,color:muted});text(p.source.facts,{size:8,color:muted});}text(p.adaptation,{size:8,color:muted});y-=10;text('Maßvarianten sind eigene Berechnungen. Die Referenzquellen sind überwiegend statisch; eine dynamische Maßgleichheit wird nicht zugesagt.',{size:8,color:muted});
  if(j.source){heading('Verbindungsquelle',15);text(model.project.outdoor?'Festool DOMINO-Handbuch: Sipo-Sortiment und Frästiefen der DF 500. Die asymmetrischen 12/20-mm-Taschen sind unsere Festlegung für diese Variante.':'Festool DOMINO-Handbuch: Beim 4-mm-Spezialfräser ergibt die Tiefeneinstellung 20 mm tatsächlich 10 mm Frästiefe.',{size:8,color:muted});text(j.source,{size:7,color:muted});}
+ if(course){heading('Werkstattkurs: Herstellerunterlagen',16);text('Eigene Funktionsskizzen, Arbeitsfolge und Anrisse. Noch kein praktischer Probebau. Die Skizzen sind nicht maßstäblich und keine Darstellung aller Bedienelemente. Originalbetriebsanleitung der tatsächlich verwendeten Maschine beachten.',{size:8,color:muted});for(const source of course.sources){y-=8;text(source.title,{size:8,type:bold});text(source.url,{size:7,color:muted});text(source.note,{size:8,color:muted});}}
  doc.getPages().forEach((p,i)=>{p.drawLine({start:{x:M,y:36},end:{x:W-M,y:36},color:line,thickness:.6});p.drawText(`${model.project.short} · v${version} · mm / cm`,{x:M,y:23,size:7,font,color:muted});p.drawText(`${i+1} / ${doc.getPageCount()}`,{x:W-M-25,y:23,size:7,font,color:muted});});
  doc.setTitle(`Werkstück - ${p.short} - ${full?'Schritt-für-Schritt':'Werkstattplan'}`);doc.setAuthor('Werkstück');doc.setSubject(`${j.name}; gemeinsame Modelldaten, metrisch`);return doc.save();
 }

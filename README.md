@@ -7,7 +7,7 @@ Eigenständige, deutschsprachige Bauanleitungswebsite. Sechs parametrische Proje
 - Drehbares 3D-Modell, Explosionsansicht und auswählbare Bauteile.
 - Freie metrische Maße ohne festes Raster; alle Ausgaben nutzen dieselbe Geometrie.
 - Materialbudget, Werkzeugcheckliste und lokale Fortschrittsspeicherung.
-- Fünf Montageschritte mit manueller Steuerung und Wiedergabe.
+- Fünf Montageübersichten mit manueller Steuerung; zusätzlich ein 24-schrittiger bebilderter Werkstattkurs für die Haken-Garderobe mit Festool DF 500 Q.
 - Zuschnittliste als CSV, direkter PDF-Download (kurz und ausführlich).
 - Lokaler Entwurfsimport und -export als JSON, einschließlich Projekt und Verbindung; bisherige v1-Kistenentwürfe bleiben lesbar.
 - Schrauben, Runddübel oder DOMINO-Dübel bei geeigneten Holzverbindungen; Seil und Bänder bleiben projektspezifisch.
@@ -90,3 +90,13 @@ DOMINO innen: 4 × 20 mm Buche; mit verkürztem D-4-Spezialfräser an der DF 500
 Für die sechs Projekte gibt es 15 Berechnungs-/Referenztests mit Prüfungen über Maßbereiche und Dateien. PDF-Erzeugung wurde für alle sechs Projekte in der Browseroberfläche geprüft; zusätzlich wurden zwölf PDF-Layouts erzeugt, Texte und Seitenränder kontrolliert und ausgewählte Seiten visuell geprüft. Die Bilder in den lokalen PDF-Layoutprüfungen sind ausdrücklich Platzhalter; die Browserdownloads verwenden die aktuellen 3D-Ansichten.
 
 Die Version 0.2.0 wird zuerst ausschließlich in der Testumgebung veröffentlicht. Die bisherige Liveversion bleibt auf dem bereits freigegebenen Stand, bis eine eigene Livefreigabe erfolgt.
+
+## Version 0.3.0: Ein Handgriff pro Arbeitsschritt
+
+Die Haken-Garderobe mit DOMINO hat einen detaillierten Beispielkurs mit 24 eigenen Vektorzeichnungen. Abmessen, Anzeichnen, Sägen, D-4-Fräserwechsel, Anschläge, Taschen in Kante und Fläche, Probe, Trockenmontage, Schleifen, Verleimen und Beschlagmontage werden in einzelnen Handgriffen erklärt. Jeder Schritt zeigt Werkzeugwerte, Bezug und Ansatz sowie eine Ergebniskontrolle. Skizzen lassen sich vergrößern; Kursfortschritt wird je Maßvariante und Umgebung lokal gespeichert. Der ausführliche PDF-Download enthält denselben Kurs mit allen Skizzen.
+
+Beispielgerät ist die kabelgebundene DF 500 Q. Die Quellen und der Unterschied zur neueren RQ-Baureihe sind im Kurs genannt; die Skizzen zeigen die Kontaktgeometrie, keine maßgetreue Nachbildung der Bedienelemente. D-4-Spezialfräser: Tiefe auf 20, real 10 mm; freier Höhenanschlag auf halbe tatsächliche Materialstärke. Enges erstes Taschenpaar, weitere Ablagetaschen mit der mittleren Breitenstufe. Die Breitenverstellung erfolgt nach Festool bei laufender Maschine außerhalb des Eingriffs; alle anderen Einrichtarbeiten stromlos.
+
+Für die Garderobe wurden gut ablesbare Dübelpositionen mit höchstens 250 mm Teilung gewählt: Im 600-mm-Grundmaß 100 / 300 / 500 mm. Modell-Verbindungsliste und Kurs verwenden dieselben Werte. Alle anderen Projekte behalten ihre bisherigen Berechnungen. Wandbohrwerte und Beschlaglochbilder müssen zum tatsächlichen Untergrund und gekauften Beschlag passen; es werden keine universellen Werte erfunden. Ein praktischer Probebau steht weiterhin aus.
+
+19 automatisierte Prüfungen: die 15 bisherigen plus vier Kursprüfungen für Referenzlage, Maßvarianten, richtige Arbeitsfolge und Projektauswahl. Veröffentlichung zuerst nur in der Testumgebung.
