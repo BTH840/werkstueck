@@ -35,16 +35,16 @@ node scripts/offline.mjs
 
 ## GitHub: zwei getrennte Websites
 
-Vorbereitete Zielnamen für das Konto `BTH840`:
+Eingerichtete Repositories für das Konto `BTH840`:
 
-| Repository | Zweck | Vorgesehene Adresse |
+| Repository | Zweck | Adresse |
 | --- | --- | --- |
 | `werkstueck` | Maßgeblicher Quellcode und Livewebsite | `https://bth840.github.io/werkstueck/` |
 | `werkstueck-test` | Testwebsite; zieht den Quellstand aus `werkstueck` | `https://bth840.github.io/werkstueck-test/` |
 
-**Status bei Übergabe:** lokal erstellt und geprüft. Die Repositories, Pages-Einstellungen und tatsächlichen Veröffentlichungen müssen noch über den angemeldeten GitHub-Zugang eingerichtet werden. Diese Adressen sind vorgesehen, nicht als funktionierend bestätigt.
+**Status am 9. November 2026:** Beide öffentlichen Repositories und Pages-Veröffentlichungen sind eingerichtet. Test- und Livewebsite sind erreichbar und im Browser geprüft. Beide verwenden den Quellstand `ef94329d43343cbbc787d383c936ac11c2e872dc`. Testlauf: https://github.com/BTH840/werkstueck-test/actions/runs/42579591214 · Livelauf: https://github.com/BTH840/werkstueck/actions/runs/42579802007. Maßänderung, Explosionsansicht, Montage und PDF-Erzeugung wurden auf der Testadresse geprüft. Live verwendet einen eigenen Browserspeicherschlüssel.
 
-### Ersteinrichtung
+### Ersteinrichtung (bereits durchgeführt)
 
 1. Beide Repositories öffentlich und ohne fremde Inhalte anlegen. Dadurch sind Code, Website und Teststände öffentlich. Keine vertraulichen Dateien hochladen.
 2. Diesen Quellcode einschließlich `.github/` in `werkstueck`, Branch `main`, übertragen. Den Workflow `pages.yml` und diese Anleitung auch in `werkstueck-test`, Branch `main`, ablegen. Die Testseite benötigt keine zweite gepflegte Kopie des App-Codes.
