@@ -1,0 +1,71 @@
+name: Test oder Live veröffentlichen
+run-name: Veröffentlichen · ${{ inputs.source_ref }}
+on:
+  workflow_dispatch:
+    inputs:
+      source_ref:
+        description: 'Test: main oder Commit-SHA. Live: vollständige SHA der geprüften Testversion.'
+        required: true
+        default: main
+permissions:
+  contents: read
+concurrency:
+  group: pages
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      source_sha: ${{ steps.source.outputs.sha }}
+    env:
+      SOURCE_REPO: ${{ github.repository_owner }}/werkstueck
+      TARGET_REPO: ${{ github.event.repository.name }}
+      REQUESTED_REF: ${{ inputs.source_ref }}
+      OWNER: ${{ github.repository_owner }}
+    steps:
+      - name: Freigabe und getesteten Stand prüfen
+        shell: bash
+        run: |
+          if [[ "$TARGET_REPO" == "werkstueck-test" ]]; then
+            echo "DEPLOY_ENV=test" >> "$GITHUB_ENV"
+          elif [[ "$TARGET_REPO" == "werkstueck" ]]; then
+            [[ "$REQUESTED_REF" =~ ^[0-9a-f]{40}$ ]] || { echo 'Live benötigt die vollständige getestete Commit-SHA.'; exit 1; }
+            curl --fail --retry 3 --silent --show-error "https://${OWNER}.github.io/werkstueck-test/build.json?run=${GITHUB_RUN_ID}" > /tmp/test-build.json
+            python3 -c 'import json,os; d=json.load(open("/tmp/test-build.json")); assert d["environment"]=="test" and d["sourceSha"]==os.environ["REQUESTED_REF"], "Der gewünschte Stand ist nicht die aktuelle Testversion."'
+            echo "DEPLOY_ENV=production" >> "$GITHUB_ENV"
+          else
+            echo 'Unbekanntes Zielrepository.'; exit 1
+          fi
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ env.SOURCE_REPO }}
+          ref: ${{ inputs.source_ref }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - id: source
+        run: |
+          SHA=$(git rev-parse HEAD)
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+          echo "SOURCE_SHA=$SHA" >> "$GITHUB_ENV"
+          echo "Geprüfter Quellstand: $SHA" >> "$GITHUB_STEP_SUMMARY"
+      - run: npm test
+      - run: npm run build
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Veröffentlichen
+        id: deployment
+        uses: actions/deploy-pages@v4

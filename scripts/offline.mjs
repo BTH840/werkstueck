@@ -1,0 +1,10 @@
+import {readFile,writeFile} from 'node:fs/promises';import {fileURLToPath} from 'node:url';import path from 'node:path';
+const root=fileURLToPath(new URL('../',import.meta.url)),read=p=>readFile(path.join(root,p),'utf8');
+let html=await read('index.html');
+const css=await read('src/styles.css'),svg=Buffer.from(await read('mark.svg')).toString('base64');
+const js=(await Promise.all(['src/core.js','src/viewer.js','src/pdf.js','src/app.js'].map(read))).map(s=>s.replace(/^import .*?;\n/gm,'').replaceAll('export ','')).join('\n');
+html=html.replace('<link rel="stylesheet" href="./src/styles.css">',()=>`<style>${css}</style>`).replaceAll('./mark.svg','data:image/svg+xml;base64,'+svg);
+html=html.replace(/<script src="\.\/config.js"><\/script><script defer src="\.\/vendor\/pdf-lib.min.js"><\/script><script type="module" src="\.\/src\/app.js"><\/script>/,'');
+const scripts=`<script>${await read('config.js')}</script><script>${(await read('vendor/pdf-lib.min.js')).replaceAll('</script','<\\/script')}</script><script>${js.replaceAll('</script','<\\/script')}</script>`;
+html=html.replace('</body>',()=>scripts+'</body>');
+await writeFile(path.join(root,'Werkstueck-offline.html'),html);console.log('Offline version ready: Werkstueck-offline.html');
