@@ -1,5 +1,5 @@
 {
-  "version": "0.3.0",
+  "version": "0.4.0",
   "reviewDate": "2026-11-09",
   "sourcesAreStatic": true,
   "projects": [
@@ -212,7 +212,9 @@
         "note": "Ergänzende aktuelle Herstellerquelle. Die Beispielzeichnungen beziehen sich auf die DF 500 Q; Lochbreiten der Baureihen unterscheiden sich. Die Symbole und Betriebsanleitung deiner Maschine sind maßgeblich."
       }
     ],
-    "automatedTests": 19,
-    "browserPDFPages": 27
+    "automatedTests": 20,
+    "browserPDFPages": 34,
+    "illustrationStyle": "Original räumliche Werkstückzeichnungen; gestrichelte Anrisse, Mittelpunkte und Maßketten. Keine Maschinen- oder Zwingenbilder.",
+    "referenceLayout": "https://www.ikea.com/de/de/assembly_instructions/bekvaem-tritthocker-akazie__AA-444158-11-2.pdf"
   }
 }

@@ -72,7 +72,7 @@ async function downloadPlan(full){
  try{const images=[],workshopImages=[];assembly.selected=null;assembly.stage=4;assembly.draw();images.push(assembly.canvas.toDataURL('image/png'));
   if(course){for(const s of course.steps)workshopImages.push(await workshopPNG(course,s));}
   else if(full)for(let i=0;i<stepsFor(exportModel).length;i++){assembly.stage=i;assembly.draw();images.push(assembly.canvas.toDataURL('image/png'));}
-  const bytes=await createPlan(exportModel,{full,images,workshopImages,version:config.version});download(bytes,exportModel.project.id+(course?'-df500-werkstattkurs.pdf':full?'-schritt-fuer-schritt.pdf':'-werkstattplan.pdf'),'application/pdf');$('download-status').textContent=exportModel.project.short+': Dein PDF wurde erstellt.';
+  const bytes=await createPlan(exportModel,{full,images,workshopImages,version:config.version});download(bytes,exportModel.project.id+(course?'-df500-bildanleitung.pdf':full?'-schritt-fuer-schritt.pdf':'-werkstattplan.pdf'),'application/pdf');$('download-status').textContent=exportModel.project.short+': Dein PDF wurde erstellt.';
  }catch(err){$('download-status').textContent='PDF konnte nicht erstellt werden. Bitte erneut versuchen.';console.error(err);}
  finally{assembly.stage=before.stage;assembly.selected=before.selected;assembly.draw();controls.forEach(({el,disabled})=>el.disabled=disabled);}
 }

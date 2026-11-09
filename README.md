@@ -100,3 +100,11 @@ Beispielgerät ist die kabelgebundene DF 500 Q. Die Quellen und der Unterschied 
 Für die Garderobe wurden gut ablesbare Dübelpositionen mit höchstens 250 mm Teilung gewählt: Im 600-mm-Grundmaß 100 / 300 / 500 mm. Modell-Verbindungsliste und Kurs verwenden dieselben Werte. Alle anderen Projekte behalten ihre bisherigen Berechnungen. Wandbohrwerte und Beschlaglochbilder müssen zum tatsächlichen Untergrund und gekauften Beschlag passen; es werden keine universellen Werte erfunden. Ein praktischer Probebau steht weiterhin aus.
 
 19 automatisierte Prüfungen: die 15 bisherigen plus vier Kursprüfungen für Referenzlage, Maßvarianten, richtige Arbeitsfolge und Projektauswahl. Veröffentlichung zuerst nur in der Testumgebung.
+
+## Version 0.4.0: Werkstück statt Werkzeugbild
+
+Der Beispielkurs ist als Bildanleitung aufgebaut: große nummerierte Einzelbilder, Teilnummern, Richtungspfeile, gestrichelte Anrisslinien, Mittelpunkte und Abstände direkt auf eigenen räumlichen Werkstückzeichnungen. Maschinen, Fräser, Messgeräte und Zwingen werden nicht mehr abgebildet. Wichtige Fräsachsen und Taschentiefen erhalten vergrößerte Details am Holz. Reale Koordinaten werden aus denselben Modelldaten auf die Werkstückflächen projiziert. Die Hakenansicht unterscheidet ausdrücklich zwischen Beschlagmitten und den noch vom echten Haken zu übertragenden Schraubenlöchern.
+
+Die Bildschirmansicht zeigt eine kurze Aktion, das große Bild und die wesentlichen Einstellungen. Die einzelnen Handgriffe sind aufklappbar. Das PDF enthält Bildschritte und einen separaten Anhang mit allen Handgriffen. Allgemeine Gestaltungsreferenz ist der öffentlich verlinkte Aufbau einer IKEA-BEKVÄM-Anleitung. Fremde Grafiken, Texte, Symbole oder Bauteile werden nicht übernommen.
+
+Version 0.4.0 wird nur in der Testumgebung veröffentlicht. Die Konstruktion und die Werte der DF 500 bleiben unverändert.

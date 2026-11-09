@@ -30,3 +30,13 @@ test('full 24-step course includes marking, physical setup, trial, both plunges,
 test('illustrated course stays specific to the chosen construction and connection',()=>{
  for(const p of PROJECTS)for(const type of p.connections){const m=createModel(p.defaults,p.id,type);assert.equal(Boolean(workshopFor(m)),p.id==='garderobe'&&type==='domino');}
 });
+
+test('picture instructions project every mark from the current part and never draw a machine',()=>{
+ for(const thickness of[16,18,24])for(const width of[400,600,1000]){
+  const c=workshopFor(createModel({...defaults,width,thickness},'garderobe','domino'));
+  for(const s of c.steps){const svg=workshopSVG(c,s);assert.match(svg,/data-illustration="workpiece-only"/);assert.ok(s.visual.instruction.length>30);assert.ok(s.visual.view.length>30);assert.ok(!/Schraubzwinge|Sägeblatt|Maschinengehäuse|<image/.test(svg));}
+  for(const id of['achse-ablage','ablage-fraesen']){const svg=workshopSVG(c,c.steps.find(s=>s.id===id));for(const x of c.positions){if(id==='ablage-fraesen')assert.ok(svg.includes(`data-x-mm="${x}" data-offset-mm="${thickness/2}"`));}assert.ok(svg.includes('stroke-dasharray'));
+  }
+  const svg=workshopSVG(c,c.steps.find(s=>s.id==='wand'));assert.ok(svg.includes(`data-x-mm="50" data-y-mm="${defaults.height/4}"`));assert.ok(svg.includes(`data-x-mm="${width-50}"`));
+ }
+});

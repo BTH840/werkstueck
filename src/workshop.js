@@ -1,8 +1,8 @@
 // This course describes one specific construction. Dimensions and marks are shared with the model.
-export const WORKSHOP_REVISION='df500-garderobe-v1';
+export const WORKSHOP_REVISION='df500-garderobe-v2';
 export const WORKSHOP_SOURCES=[
  {title:'Festool DOMINO-Anwenderhandbuch · DF 500 Q, Einstellungen und Plattenverbindungen',url:'https://www.festool.ch/-/media/tts/fcp/festool/knowledge/downloads-page/download-brochures/manual_domino/manual_domino_system.pdf',note:'Abschnitte 1.4.4–1.4.9 und 4.9. Unsere Anrisse, Spannfolge und Garderobenmaße sind eigene Festlegungen.'},
- {title:'Festool Originalbetriebsanleitung · aktuelle DF 500 RQ',url:'https://media.cdn.festool.io/productmedia/Images/attachment/d2e7333e-3714-11f0-8a62-005056b3ad01.pdf',note:'Ergänzende aktuelle Herstellerquelle. Die Beispielzeichnungen beziehen sich auf die DF 500 Q; Lochbreiten der Baureihen unterscheiden sich. Die Symbole und Betriebsanleitung deiner Maschine sind maßgeblich.'}
+ {title:'Festool Originalbetriebsanleitung · aktuelle DF 500 RQ',url:'https://media.cdn.festool.io/productmedia/Images/attachment/d2e7333e-3714-11f0-8a62-005056b3ad01.pdf',note:'Ergänzende aktuelle Herstellerquelle. Die Maschineneinstellungen beziehen sich auf die DF 500 Q; Lochbreiten der Baureihen unterscheiden sich. Die Symbole und Betriebsanleitung deiner Maschine sind maßgeblich.'}
 ];
 const fmt=n=>new Intl.NumberFormat('de-DE',{maximumFractionDigits:3}).format(n);
 export function workshopFor(m){
@@ -108,5 +108,32 @@ export function workshopFor(m){
  ['Bestimme den Wandaufbau und wähle ein dafür zugelassenes Befestigungssystem entsprechend Gesamtgewicht und Nutzung. Prüfe den Bereich auf Leitungen und Rohre. Ohne geklärten Untergrund nicht bohren.', `Zeichne die geplanten Punkte am Holz an. Prüfe am echten Beschlag die Abstände zu Haken, Taschen und Holzrand. Durchgangsloch und gegebenenfalls Senkung nach Schraubenkopf und Systemanleitung ausführen. Halte die Garderobe mit einer zweiten Person in Wunschhöhe, richte sie mit der Wasserwaage aus und übertrage beide Punkte auf die Wand.`, 'Lege das Holz beiseite. Stelle Wandbohrer, Bohrtiefe einschließlich vorgegebener Zugabe und Schlagfunktion exakt nach der Anleitung des gewählten Dübels und des Wandmaterials ein. Bohre, reinige die Löcher, setze die Befestigungen und verschraube die Garderobe nach dieser Anleitung. Prüfe festen Sitz. Die Zeichnung legt keine Traglast fest.'],
  'Dieser Schritt braucht die Angaben des tatsächlich gewählten Wandbefestigungssystems. Eine konkrete Dübelgröße oder Bohrtiefe wird ohne Wanddaten bewusst nicht erfunden.', 'Die Wasserwaage richtet die beiden Wandpunkte aus. Rote Kreise sind Positionen, keine Freigabe eines bestimmten Wanddübels.')
  ];
- return {...meta,steps};
+ const visuals={
+  plan:['Teile 01 und 02 zuordnen. Die hinteren Kanten werden später bündig.','Explosionsansicht der beiden Holzteile mit Fügerichtung.'],
+  messen:[`Beide Bretter an mehreren Stellen messen. Vorgabe: ${fmt(t)} mm Stärke.`,`Rückseite sichtbar; Detail der oberen Kontaktkante mit ${fmt(a)} mm Mittenabstand.`],
+  'zuschnitt-anriss':['Länge und Breite anreißen. Den Abfall neben der Schnittlinie markieren.','Beide Holzteile mit gestrichelten Schnittlinien und Maßpfeilen.'],
+  'saege-einstellen':['Rechtwinkligen Schnitt und zur Holzstärke passende Sägetiefe einstellen.','Das Brett und seine Schnittmaße; die Sägenwerte stehen darunter.'],
+  saegen:['Auf der Abfallseite der Linie schneiden. Fertigmaße nachmessen.','Beide Zuschnitte und die Lage der fertigen Schnittkante.'],
+  bezug:['R und L auf beiden Teilen kennzeichnen. An der Ablage zusätzlich U markieren.','01: breite Rückseite R; 02: Unterseite U mit hinterer Bezugskante R.'],
+  positionen:[`Positionsstriche bei ${x.map(fmt).join(' / ')} mm ab L auf beide Teile übertragen.`,'Gestrichelte Positionslinien über der Rückseite des Hakenbretts. Alle Maße einzeln ab L.'],
+  'achse-brett':[`Auf der schmalen Oberkante eine Mittellinie ${fmt(a)} mm unter R anzeichnen.`,'Hakenbrett von der Rückseite gesehen. Die markierte schmale Vorderkante ist seine spätere Oberkante.'],
+  'achse-ablage':[`Auf U die Lochreihe ${fmt(a)} mm von R anzeichnen. An jedem Positionsstrich ein Kreuz setzen.`,'Unterseite U sichtbar. Die gestrichelte Lochreihe liegt dicht an der hinteren Kante R.'],
+  fraeser:['D-4-Spezialfräser wählen. Geplant sind 4 × 20-mm-Dübel und reale 10-mm-Taschen.','Geplante Taschen am Werkstück, dazu Detail der Taschentiefe im Holz.'],
+  'tiefe-winkel':['Frästiefenrastung 20 einstellen: mit D 4 real 10 mm. Winkelanschlag auf 90° setzen.','Die Taschen enden im Holz. Der Schnitt zeigt Tiefe und verbleibende Materialstärke.'],
+  hoehe:[`Freie Fräshöhe auf ${fmt(a)} mm setzen. Die Achse muss den Anriss treffen.`,'Mittelpunkte auf der schmalen oberen Kontaktkante des Hakenbretts.'],
+  lochbreite:['01: alle Taschen eng. 02: erstes Paar eng, weitere Taschen mit Spiel.','Die beiden Werkstücke mit den jeweils vorgesehenen Taschen.'],
+  probe:['Zuerst die Verbindung an gleich dickem Restholz herstellen und rechtwinklig zusammenfügen.','Die dargestellte Verbindung wird zuerst an zwei geeigneten Reststücken geprüft.'],
+  'brett-ansetzen':['Teil 01 sicher fixieren. Die Fräsermitte am angezeichneten Kreuz ausrichten.','Rückseite R oben. Die Ansatzpunkte liegen in der schmalen oberen Kontaktkante.'],
+  'brett-fraesen':[`Alle ${x.length} markierten Taschen in Teil 01 eng und real 10 mm tief fräsen.`,'Fertige Taschen auf der gestrichelten Mittellinie der oberen Kontaktkante.'],
+  'ablage-ansetzen':['Teil 02 sicher aufspannen. Fräsachse an den Kreuzen auf U ausrichten.','Unterseite U zur Orientierung oben gezeigt. Zum Fräsen wie im Ablauf beschrieben hochkant spannen.'],
+  'ablage-fraesen':['In U fräsen: Tasche 1 eng, weitere mit Spiel; jede Tasche real 10 mm tief.','Taschen in der breiten Unterseite, nicht in der hinteren Schmalkante.'],
+  trocken:['Ohne Leim zusammenfügen. Enden und Rückseiten bündig ausrichten.','Fertige Ecke: geschlossene Fuge und rechter Winkel.'],
+  schleifen:['Sichtflächen in Faserrichtung glätten. Die Leimkante rechtwinklig lassen.','Nur das Werkstück und die Bearbeitungsrichtung; keine Hilfsmittel dargestellt.'],
+  leim:['Kontaktflächen und Dübel dünn beleimen. Teile entlang der Dübelachsen fügen.','Explosionsansicht mit markierter Leimzone und Fügerichtung.'],
+  zwingen:['Fuge rechtwinklig schließen und nach Leimhersteller aushärten lassen.','Kraftpfeile auf dem Werkstück zeigen die Richtung zum Schließen der Fuge.'],
+  haken:['Hakenmitten anreißen. Erst dann die echten Schraubenlöcher vom Beschlag übertragen.','Vorderseite sichtbar. Die Kreuze markieren Hakenmitten, keine frei erfundenen Schraubenlöcher.'],
+  wand:[`Wandpunkte bei 50 / ${fmt(w-50)} mm ab links und ${fmt(h/4)} mm unter der Brettoberkante markieren.`,'Vorderseite sichtbar. Bohrdurchmesser und Tiefe hängen vom Wandbefestigungssystem ab.']
+ };
+ const pictureSteps=steps.map(step=>({...step,visual:{instruction:visuals[step.id][0],view:visuals[step.id][1]},caption:visuals[step.id][1]}));
+ return {...meta,steps:pictureSteps,illustrationReference:{title:'IKEA BEKVÄM: Aufbau mit nummerierten Bildschritten',url:'https://www.ikea.com/de/de/assembly_instructions/bekvaem-tritthocker-akazie__AA-444158-11-2.pdf',note:'Gestaltungsreferenz für große Bildschritte, Teilnummern und Richtungspfeile. Zeichnungen und Maße dieser Garderobe sind eigene Arbeiten.'}};
 }
