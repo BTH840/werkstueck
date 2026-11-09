@@ -1,4 +1,5 @@
 import {PROJECTS,CONNECTIONS,getProject} from './projects.js';
+import {normalizeWorkshopHardware} from './workshop.js';
 export const DEFAULTS=Object.freeze({...getProject().defaults});
 export const LIMITS=Object.freeze({...getProject().limits});
 export const tools=['Maßband, Bleistift und Winkel','Säge mit Führung und passendem Sägeblatt','Bohrschrauber, Holzbohrer und Senker','Zwingen und rechtwinklige Montagehilfe','Schleifpapier und Schleifklotz','Schutzbrille, Gehörschutz und passende Staubabsaugung'];
@@ -31,7 +32,7 @@ function jointsFor(id,d){const {width:w,depth:z,height:h,thickness:t}=d;
  ...['02 / 03','02 / 04','05 / 03','05 / 04'].map(parts=>({parts,length:h,axis:'Wandecke: von der unteren Wandkante aufwärts'}))];
  return [];
 }
-export function createModel(input=DEFAULTS,projectId='werkstattkiste',connectionId){
+export function createModel(input=DEFAULTS,projectId='werkstattkiste',connectionId,hardware){
  const project=getProject(projectId),d=validateDimensions(input,projectId),{width:w,depth:z,height:h,thickness:t}=d;
  const connection=connectionId||project.connections[0];
  if(!project.connections.includes(connection))throw Error('Diese Verbindung passt nicht zu diesem Projekt.');
@@ -70,7 +71,8 @@ export function createModel(input=DEFAULTS,projectId='werkstattkiste',connection
  // Rope prisms are rotated. Explicit bounds describe the hanging silhouette, not their unrotated boxes.
  let overall=[bounds[0][1]-bounds[0][0],bounds[2][1]-bounds[2][0],bounds[1][1]-bounds[1][0]];
  if(projectId==='seilbaum')overall=[w,Math.max(t,16),2*h+z+250];
- const model={project,dimensions:d,connection,parts,woodParts,area,overall,extras,details,joints:jointsFor(projectId,d),fingerprint:JSON.stringify({projectId,d,connection})};
+ const workshopHardware=projectId==='garderobe'?normalizeWorkshopHardware(hardware??{},d):undefined;
+ const model={project,dimensions:d,connection,workshopHardware,parts,woodParts,area,overall,extras,details,joints:jointsFor(projectId,d),fingerprint:JSON.stringify({projectId,d,connection,workshopHardware})};
  model.joinery=joineryFor(model);return model;
 }
 export function joineryFor(model){
@@ -95,8 +97,8 @@ export function stepsFor(m){const d=m.dimensions,p=m.project.id,n=number,j=m.joi
  return a.map(([title,parts,text,check])=>({title,parts,text,check}));
 }
 export function estimate(model,quantity,woodPrice,hardwarePrice){if(!Number.isInteger(quantity)||quantity<1||quantity>100||![woodPrice,hardwarePrice].every(n=>Number.isFinite(n)&&n>=0&&n<=10000))throw Error('Bitte gültige Stückzahl und Preise eingeben.');const area=model.area*1.15*quantity;return {area,total:area*woodPrice+quantity*hardwarePrice};}
-export function projectFile(dimensions,project='werkstattkiste',connection){const m=createModel(dimensions,project,connection);return JSON.stringify({schema:'werkstueck/v2',project,connection:m.connection,units:'mm',dimensions:m.dimensions},null,2);}
-export function parseProject(raw){const p=JSON.parse(raw);if(!p||typeof p!=='object'||!['werkstueck/v1','werkstueck/v2'].includes(p.schema))throw Error('Unbekanntes Werkstück-Dateiformat.');if(p.units&&p.units!=='mm')throw Error('Die Projektdatei muss Millimeter verwenden.');const m=createModel(p.dimensions,p.project,p.connection);return {project:m.project.id,dimensions:m.dimensions,connection:m.connection};}
+export function projectFile(dimensions,project='werkstattkiste',connection,hardware){const m=createModel(dimensions,project,connection,hardware);return JSON.stringify({schema:'werkstueck/v2',project,connection:m.connection,units:'mm',dimensions:m.dimensions,...(m.workshopHardware?{hardware:m.workshopHardware}:{})},null,2);}
+export function parseProject(raw){const p=JSON.parse(raw);if(!p||typeof p!=='object'||!['werkstueck/v1','werkstueck/v2'].includes(p.schema))throw Error('Unbekanntes Werkstück-Dateiformat.');if(p.units&&p.units!=='mm')throw Error('Die Projektdatei muss Millimeter verwenden.');const m=createModel(p.dimensions,p.project,p.connection,p.hardware);return {project:m.project.id,dimensions:m.dimensions,connection:m.connection,...(m.workshopHardware?{hardware:m.workshopHardware}:{})};}
 export function cutCSV(model){return '\ufeff'+[['Projekt',model.project.short,'Verbindung',model.joinery.name],['Teil','Bezeichnung','Länge (mm)','Breite (mm)','Stärke (mm)','Anzahl','Hinweis'],...model.woodParts.map(p=>[p.id,p.name,...p.cut.map(n=>number(n,3)),1,p.note])].map(row=>row.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(';')).join('\r\n');}
 export function auditModel(m){const d=m.dimensions,id=m.project.id,tests=[{name:'Positive Zuschnittmaße',pass:m.woodParts.every(p=>p.cut.every(n=>Number.isFinite(n)&&n>0))},{name:'Materialstärke in allen Holzteilen',pass:m.woodParts.every(p=>p.cut[2]===d.thickness)}];
  if(m.joinery.rows.length)tests.push({name:'Verbindungsmittel liegen innerhalb der Kontaktkante',pass:m.joinery.rows.every(r=>r.positions.every(x=>x>=37&&x<=r.length-37))});

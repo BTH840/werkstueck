@@ -1,7 +1,7 @@
 import {number,stepsFor,toolsFor} from './core.js';
 import {workshopFor} from './workshop.js';
 // All measurements and joinery come from the current model, not from static plan text.
-export async function createPlan(model,{full=false,images=[],workshopImages=[],version='0.5.0'}={}){
+export async function createPlan(model,{full=false,images=[],workshopImages=[],version='0.6.0'}={}){
  const pictureCourse=full?workshopFor(model):null;if(pictureCourse)return createPicturePlan(model,pictureCourse,workshopImages,version);
  const {PDFDocument,StandardFonts,rgb}=globalThis.PDFLib,doc=await PDFDocument.create();
  const font=await doc.embedFont(StandardFonts.Helvetica),bold=await doc.embedFont(StandardFonts.HelveticaBold),serif=await doc.embedFont(StandardFonts.TimesRoman);
@@ -46,5 +46,5 @@ async function createPicturePlan(model,course,images,version){
   page.drawImage(img,{x:(841.89-fit.width)/2,y:(595.28-fit.height)/2+5,width:fit.width,height:fit.height});
   page.drawText(`${i+1} / ${images.length}`,{x:785,y:12,size:7,font,color:rgb(.4,.45,.4)});
  }
- doc.setTitle('Werkstück - Garderobe - Bildanleitung');doc.setAuthor('Werkstück');doc.setSubject(`v${version}; DF 500 Q; D 4; 10 Bildschritte; mm`);doc.setKeywords([...course.sources.map(s=>s.url),course.illustrationReference.url]);return doc.save();
+ doc.setTitle('Werkstück - Garderobe - Bildanleitung');doc.setAuthor('Werkstück');doc.setSubject(`v${version}; DF 500 Q; D 4; ${course.steps.length} Bildschritte; mm`);doc.setKeywords([...course.sources.map(s=>s.url),course.illustrationReference.url]);return doc.save();
 }

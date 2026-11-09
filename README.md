@@ -114,3 +114,12 @@ Version 0.4.0 wird nur in der Testumgebung veröffentlicht. Die Konstruktion und
 Der Beispielplan beginnt mit zwei einzelnen Zuschnittzeichnungen. Es folgen Anzeichnen, Fräsen und Bohrpunkte; erst danach Dübel, Fügen und Haken. Sichtbare Erklärungstexte und der PDF-Anhang entfallen. Die Website zeigt die Zeichnung mit Schrittwahl, die Bild-PDF hat genau zehn querformatige Seiten. Quellen bleiben separat aufklappbar. Die Text-Montageübersicht wird bei dieser Variante ausgeblendet.
 
 Alle Holzteile verwenden dieselbe räumliche Projektion. Zur Blickrichtung passen die sichtbare linke Stirnfläche, Vorderkante und Oberseite. Die bisher fälschlich gezeichnete verdeckte rechte Stirnfläche entfällt. Zuschnitt, Anriss, Taschen und Zusammenbau verwenden durchgehend diese Geometrie. Die 20 Prüfungen umfassen auch die Projektionsrichtung und gemeinsame Kanten.
+
+
+## Version 0.6.0: Überblick und jedes Loch einzeln
+
+Die Bildanleitung beginnt mit der fertigen Garderobe, danach folgt eine benannte Explosionszeichnung von Hakenbrett, Ablage, DOMINO-Dübeln und Haken. Zuschnitt und Bearbeitung schließen sich an. Website und PDF enthalten dieselben zwölf Zeichnungen. Alle Frässtellen tragen einzelne F-Kennungen mit absoluten Koordinaten, Schlitzbreite, Schlitzhöhe und tatsächlicher Tiefe.
+
+Das Beschlagmodell ist ausdrücklich offen. Unter „Bohrbild festlegen“ können ein oder zwei Löcher pro Haken mit Versatz zur Hakenmitte, Durchmesser und Bohrtiefe einschließlich Bohrerspitze eingegeben werden. Jedes erzeugte Loch erhält eine H-Kennung und eigene absolute x/y-Maße ab linker bzw. oberer Brettkante. W bezeichnet den Holzdurchgang, M die dazugehörige Wandbohrung. Unbekannte Durchmesser und Tiefen bleiben als „offen“ sichtbar. Wandangaben sind Eingabewerte für den tatsächlichen Befestigungssatz, keine aus dem Untergrund berechneten Empfehlungen.
+
+Beschlagdaten werden je Variante im Browser und in der Entwurfsdatei gespeichert; PDF und Zeichnung verwenden denselben Stand. Die 23 automatisierten Prüfungen decken auch einzelne Lochkoordinaten, offene Beschläge, Eingabegrenzen und Dateirundlauf ab. Im Browser wurden ein zweilochiges Testmuster, Speicherung nach Neuladen, das Rücksetzen auf offene Beschläge sowie die zwölfseitige PDF geprüft. Ein praktischer Probebau steht weiterhin aus.
