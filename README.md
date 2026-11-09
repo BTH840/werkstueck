@@ -108,3 +108,9 @@ Der Beispielkurs ist als Bildanleitung aufgebaut: große nummerierte Einzelbilde
 Die Bildschirmansicht zeigt eine kurze Aktion, das große Bild und die wesentlichen Einstellungen. Die einzelnen Handgriffe sind aufklappbar. Das PDF enthält Bildschritte und einen separaten Anhang mit allen Handgriffen. Allgemeine Gestaltungsreferenz ist der öffentlich verlinkte Aufbau einer IKEA-BEKVÄM-Anleitung. Fremde Grafiken, Texte, Symbole oder Bauteile werden nicht übernommen.
 
 Version 0.4.0 wird nur in der Testumgebung veröffentlicht. Die Konstruktion und die Werte der DF 500 bleiben unverändert.
+
+## Version 0.5.0: Zehn Bilder, drei Abschnitte
+
+Der Beispielplan beginnt mit zwei einzelnen Zuschnittzeichnungen. Es folgen Anzeichnen, Fräsen und Bohrpunkte; erst danach Dübel, Fügen und Haken. Sichtbare Erklärungstexte und der PDF-Anhang entfallen. Die Website zeigt die Zeichnung mit Schrittwahl, die Bild-PDF hat genau zehn querformatige Seiten. Quellen bleiben separat aufklappbar. Die Text-Montageübersicht wird bei dieser Variante ausgeblendet.
+
+Alle Holzteile verwenden dieselbe räumliche Projektion. Zur Blickrichtung passen die sichtbare linke Stirnfläche, Vorderkante und Oberseite. Die bisher fälschlich gezeichnete verdeckte rechte Stirnfläche entfällt. Zuschnitt, Anriss, Taschen und Zusammenbau verwenden durchgehend diese Geometrie. Die 20 Prüfungen umfassen auch die Projektionsrichtung und gemeinsame Kanten.
