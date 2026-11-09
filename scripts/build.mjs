@@ -9,7 +9,7 @@ const dist=path.join(root,'dist');await rm(dist,{recursive:true,force:true});awa
 for(const file of['index.html','mark.svg'])await copyFile(path.join(root,file),path.join(dist,file));
 await cp(path.join(root,'src'),path.join(dist,'src'),{recursive:true,filter:p=>!p.endsWith('.test.js')});
 await cp(path.join(root,'vendor'),path.join(dist,'vendor'),{recursive:true});
-const config={environment,version:'0.1.0',sourceSha:sha};
+const config={environment,version:'0.2.0',sourceSha:sha};
 await writeFile(path.join(dist,'config.js'),`window.WERKSTUECK_CONFIG = ${JSON.stringify(config)};\n`);
 await writeFile(path.join(dist,'build.json'),JSON.stringify(config,null,2));
 await writeFile(path.join(dist,'.nojekyll'),'');

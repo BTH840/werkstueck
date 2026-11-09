@@ -1,6 +1,6 @@
 # Werkstück
 
-Eigenständige, deutschsprachige Bauanleitungswebsite. Erstes Beispiel: eine parametrische Werkstattkiste. Noch kein Probebau und keine zugesicherte Tragfähigkeit.
+Eigenständige, deutschsprachige Bauanleitungswebsite. Sechs parametrische Projekte: Werkstattkiste, Kohlmeisen-Nistkasten, Seil-Weihnachtsbaum, Haken-Garderobe, Latten-Utensilo und Pflanzkasten. Noch kein Probebau und keine zugesicherte Tragfähigkeit.
 
 ## Bereits vorhanden
 
@@ -9,7 +9,10 @@ Eigenständige, deutschsprachige Bauanleitungswebsite. Erstes Beispiel: eine par
 - Materialbudget, Werkzeugcheckliste und lokale Fortschrittsspeicherung.
 - Fünf Montageschritte mit manueller Steuerung und Wiedergabe.
 - Zuschnittliste als CSV, direkter PDF-Download (kurz und ausführlich).
-- Lokaler Entwurfsimport und -export als JSON.
+- Lokaler Entwurfsimport und -export als JSON, einschließlich Projekt und Verbindung; bisherige v1-Kistenentwürfe bleiben lesbar.
+- Schrauben, Runddübel oder DOMINO-Dübel bei geeigneten Holzverbindungen; Seil und Bänder bleiben projektspezifisch.
+- Eigene Quellen-/Variantenansicht, dynamische Maßprüfung und Verbindungsmittelpunkte.
+- Gleich große Budgetfelder und Nach-oben-Button.
 - Getrennte Test-/Live-Konfiguration und vorbereitete GitHub-Pages-Workflows.
 - Keine automatisierte Fotoauswertung, keine Konten und keine Analyse-Dienste.
 
@@ -66,7 +69,7 @@ Für eine Rückkehr zu einem älteren Stand diesen zunächst im Testrepository v
 
 ## Gemeinsam weitere Projekte erstellen
 
-Neue Modelle werden zunächst hier im Gespräch aus Fotos, Skizzen und bestätigten Maßen entwickelt. `src/core.js` enthält die maßgebliche Bauteilgeometrie und Anleitung für das erste Projekt; `src/viewer.js` stellt die Bauteile ohne externe 3D-Dienste dar. Vor Veröffentlichung einer neuen Konstruktion müssen deren Maße, Verbindungen und Montagefolge geprüft werden. Die Web-Werkbank speichert aktuell Varianten der Werkstattkiste; sie ist noch kein universeller Konstruktionseditor.
+Neue Modelle werden zunächst hier im Gespräch aus Fotos, Skizzen und bestätigten Maßen entwickelt. `src/projects.js` enthält Projektstammdaten und Quellen. `src/core.js` berechnet Bauteile, Verbindungen und Anleitungen. `src/gpu.js` rendert mit Tiefenprüfung im Browser; `src/viewer.js` ergänzt Interaktion und einen 2D-Fallback. Es gibt keinen externen 3D-Dienst. Vor Veröffentlichung einer neuen Konstruktion müssen deren Maße, Verbindungen und Montagefolge geprüft werden. Die Web-Werkbank speichert Varianten aller sechs Projekte und deren Verbindungsauswahl; sie ist kein universeller Konstruktionseditor.
 
 Die Flächenreserve des Kostenrechners ist kein optimierter Plattenzuschnitt. Ganze Einkaufsgebinde und Werkzeugkosten sind nicht enthalten. Es werden keine Händlerpreise abgerufen.
 
@@ -75,3 +78,15 @@ Die Flächenreserve des Kostenrechners ist kein optimierter Plattenzuschnitt. Ga
 Statisches HTML, CSS und JavaScript ohne Build-Abhängigkeiten. Node.js wird nur für lokale Vorschau, Tests und das Kopieren der Veröffentlichungsdateien verwendet. Die PDF-Erzeugung erfolgt im Browser mit der mitgelieferten Bibliothek. Kein CDN, kein Tracking, keine externen Schriften.
 
 `src/core.test.js` prüft Geometrie und Verbindungen, freie Dezimalmaße, ungültige Eingaben, Kosten, Dateiformat und Ausgabe-Konsistenz. Manuell geprüft wurden Desktopdarstellung, mobile Breite 390 px, Maßübernahme, Bauteilauswahl, Montage, lokale Speicherung und PDF-Ausgabe. Der kompakte PDF-Download wurde im Browser geprüft und visuell gerendert; die ausführliche PDF-Seitengestaltung zusätzlich lokal geprüft. Die Offline-Datei wurde syntaktisch geprüft; die Browserprüfung erfolgte über die lokale HTTP-Vorschau. Ein echter Probebau steht aus.
+
+## Version 0.2.0: Quellen- und Funktionsabgleich
+
+Die fünf extern angeregten Anleitungen enthalten eigene Texte und Modelle. Fremde Fotos, Zeichnungen und vollständige Plan-PDFs werden nicht übernommen. Quellen und konkrete Abweichungen stehen in jeder Projektansicht sowie im exportierten PDF. Der Pflanzkasten nutzt eigene Maße und ist ausdrücklich kein maßgleicher Nachbau. Der Nistkasten ist eine eigene Flachdach-Variante mit festem 32-mm-Einflugloch.
+
+Die Originalquellen sind überwiegend statisch. Belegte Ausgangsdaten werden mit unabhängigen Testwerten verglichen; neue Varianten prüfen wir anhand unserer Konstruktionsregeln. Eine dynamische Gleichheit mit fremden Konfiguratoren wird nicht behauptet. Details stehen in `qa-report.json` und direkt im Bereich „Quellen & Prüfung“.
+
+DOMINO innen: 4 × 20 mm Buche; mit verkürztem D-4-Spezialfräser an der DF 500 bedeuten 20 mm Einstellung real 10 mm. DOMINO außen beim Pflanzkasten: 5 × 30 mm Sipo, asymmetrische Taschen 12 und 20 mm. Das Sipo-Sortiment und die Maschineneinstellungen wurden im verlinkten Festool-Handbuch kontrolliert. Die Auswahl ändert Werkzeuge, Material, Mittelpunktliste und Montage; stumpfe Außenmaße ändern sich dadurch nicht. Aufhängungen und Metallhaken behalten ihre separaten Befestigungen.
+
+Für die fünf Projekte gibt es 14 Berechnungs-/Referenztests mit Prüfungen über Maßbereiche und Dateien. PDF-Erzeugung wurde für alle sechs Projekte in der Browseroberfläche geprüft; zusätzlich wurden zwölf PDF-Layouts erzeugt, Texte und Seitenränder kontrolliert und ausgewählte Seiten visuell geprüft. Die Bilder in den lokalen PDF-Layoutprüfungen sind ausdrücklich Platzhalter; die Browserdownloads verwenden die aktuellen 3D-Ansichten.
+
+Die Version 0.2.0 wird zuerst ausschließlich in der Testumgebung veröffentlicht. Die bisherige Liveversion bleibt auf dem bereits freigegebenen Stand, bis eine eigene Livefreigabe erfolgt.

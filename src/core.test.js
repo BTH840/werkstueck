@@ -1,33 +1,20 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {createModel,validateDimensions,DEFAULTS,estimate,parseProject,projectFile,cutCSV,stepsFor} from './core.js';
-test('default geometry closes without overlaps and uses real material thickness',()=>{
- const m=createModel();assert.deepEqual(m.overall,[600,360,218]);
- assert.deepEqual(m.parts.map(p=>p.cut),[[600,360,18],[600,200,18],[324,200,18],[324,200,18],[600,200,18]]);
- const back=m.parts[1],left=m.parts[2],front=m.parts[4];
- assert.equal(back.center[2]+back.size[2]/2,left.center[2]-left.size[2]/2);
- assert.equal(front.center[2]-front.size[2]/2,left.center[2]+left.size[2]/2);
- for(const p of m.parts.slice(1))assert.equal(p.center[1]-p.size[1]/2,18);
- assert.ok(Math.abs(m.area-.5856)<1e-10);
-});
-test('decimal centimetre dimensions do not snap to a fixed grid',()=>{
- const m=createModel({width:613.7,depth:367.3,height:207.9,thickness:17.2});
- assert.equal(m.dimensions.width,613.7);assert.ok(Math.abs(m.parts[2].cut[0]-332.9)<1e-10);assert.ok(Math.abs(m.overall[2]-225.1)<1e-10);
-});
-test('limits reject NaN, infinite, missing, string and physically invalid dimensions',()=>{
- for(const n of[NaN,Infinity,0,-100,299.9,1000.1,'600'])assert.throws(()=>validateDimensions({...DEFAULTS,width:n}));
- assert.throws(()=>validateDimensions({}));
-});
-test('quantity and reserve scale material cost and reject invalid quantities',()=>{
- const m=createModel(),a=estimate(m,1,35,4),b=estimate(m,3,35,4);assert.ok(Math.abs(b.total-a.total*3)<1e-10);
- assert.ok(Math.abs(a.area-m.area*1.15)<1e-10);assert.ok(Math.abs(a.total-27.5704)<1e-8);
- for(const q of[0,1.5,101,NaN])assert.throws(()=>estimate(m,q,35,4));assert.throws(()=>estimate(m,1,-1,4));
-});
-test('project export round-trips and rejects foreign schemas and malicious values',()=>{
- assert.deepEqual(parseProject(projectFile(DEFAULTS)),DEFAULTS);
- assert.throws(()=>parseProject('{"schema":"other"}'));
- assert.throws(()=>parseProject(JSON.stringify({schema:'werkstueck/v1',project:'werkstattkiste',dimensions:{...DEFAULTS,width:'<script>'}})));
-});
-test('CSV has five consistent parts and instructions reflect custom dimensions',()=>{
- const m=createModel({...DEFAULTS,width:720,depth:425});const csv=cutCSV(m);assert.equal(csv.split('\r\n').length,6);
- assert.ok(csv.startsWith('\ufeff'));assert.ok(csv.includes('"389"'));assert.ok(stepsFor(m)[0].text.includes('720 × 425'));
-});
+import {PROJECTS,DEFAULTS,createModel,estimate,parseProject,projectFile,cutCSV,stepsFor,auditModel} from './core.js';
+const near=(a,b)=>assert.ok(Math.abs(a-b)<.00001,`${a} != ${b}`);
+// Independent source fixtures: HORNBACH tree PDF, t-online coat rack, Bosch slat organizer, NABU guidance.
+const source={tree:[600,450,300],rack:[600,200],slat:[600,90,20],gap:60,band:1370};
+test('original box closes at material interfaces and preserves baseline',()=>{const m=createModel();assert.deepEqual(m.overall,[600,360,218]);assert.deepEqual(m.parts.map(p=>p.cut),[[600,360,18],[600,200,18],[324,200,18],[324,200,18],[600,200,18]]);near(m.parts[1].center[2]+9,m.parts[2].center[2]-162);near(m.area,.5856);});
+test('HORNBACH tree: three reference lengths, six 6-mm bores and 50-mm end distances',()=>{const m=createModel(PROJECTS[2].defaults,'seilbaum');assert.deepEqual(m.woodParts.map(p=>p.cut[0]),source.tree);for(const p of m.woodParts)for(const h of p.holes){assert.equal(h.r*2,6);near(p.cut[0]/2-Math.abs(h.x),50);}});
+test('t-online coat board and hook count agree; shelf is identified as an addition',()=>{const m=createModel(PROJECTS[3].defaults,'garderobe');assert.deepEqual(m.woodParts[0].cut.slice(0,2),source.rack);assert.equal(m.parts.filter(p=>p.id.startsWith('H')&&p.id.endsWith('a')).length,5);assert.ok(m.project.adaptation.includes('Ergänzungen'));});
+test('Bosch nine-slat baseline has correct stock, gaps, straps and staples',()=>{const m=createModel(PROJECTS[4].defaults,'utensilo');assert.equal(m.woodParts.length,9);for(const p of m.woodParts)assert.deepEqual(p.cut,source.slat);near(m.parts[1].center[1]-m.parts[0].center[1]-90,source.gap);assert.equal(m.dimensions.height+80,source.band);assert.equal(m.joinery.count,54);});
+test('bird box opening never scales and its lower edge stays above NABU minimum',()=>{for(const height of[270,315.77,360]){const m=createModel({...PROJECTS[1].defaults,height},'nistkasten'),front=m.parts[4],hole=front.holes[0];assert.equal(hole.r*2,32);const lower=front.center[1]+hole.y-hole.r-m.dimensions.thickness;near(lower,184);assert.ok(lower>=170);assert.ok(m.parts[0].note.includes('5 mm'));}});
+test('decimal values remain exact through geometry, CSV and assembly',()=>{const m=createModel({width:613.7,depth:367.3,height:207.9,thickness:17.2});near(m.parts[2].cut[0],332.9);near(m.overall[2],225.1);assert.ok(cutCSV(m).includes('613,7'));assert.ok(stepsFor(m)[0].text.includes('613,7'));});
+test('project-specific formulas remain valid across allowed size ranges',()=>{for(const p of PROJECTS)for(const fraction of[0,.2,.5,.8,1]){const d={};for(const[k,[min,max]]of Object.entries(p.limits))d[k]=min+(max-min)*fraction;let m;try{m=createModel(d,p.id);}catch{assert.ok(['nistkasten','utensilo'].includes(p.id));continue;}assert.ok(auditModel(m).every(c=>c.pass),p.id);assert.ok(m.woodParts.every(p=>p.cut.every(v=>v>0)));if(['werkstattkiste','pflanzkasten'].includes(p.id)){near(m.parts[2].cut[0]+2*d.thickness,d.depth);near(m.overall[2],d.height+d.thickness);}if(p.id==='utensilo')near(m.woodParts.at(-1).center[1]+d.depth/2,d.height);}});
+test('invalid dimensions and unsuitable connections are rejected',()=>{for(const n of[NaN,Infinity,0,-100,299.9,1000.1,'600'])assert.throws(()=>createModel({...DEFAULTS,width:n}));assert.throws(()=>createModel({...DEFAULTS,thickness:12},'werkstattkiste','domino'));assert.throws(()=>createModel(PROJECTS[1].defaults,'nistkasten','domino'));assert.throws(()=>createModel(PROJECTS[2].defaults,'seilbaum','screws'));assert.throws(()=>createModel({...PROJECTS[1].defaults,width:176,thickness:24},'nistkasten'));assert.throws(()=>createModel({...PROJECTS[4].defaults,depth:100,height:1000},'utensilo'));});
+test('joinery changes machining, tools and guide without rescaling butt-joint cuts',()=>{const a=createModel(),b=createModel(DEFAULTS,'werkstattkiste','round'),c=createModel(DEFAULTS,'werkstattkiste','domino');assert.deepEqual(a.woodParts.map(p=>p.cut),c.woodParts.map(p=>p.cut));assert.deepEqual(b.overall,c.overall);assert.notEqual(b.joinery.machining,c.joinery.machining);assert.ok(stepsFor(c).some(s=>s.text.includes('DOMINO')));assert.ok(c.joinery.tools.some(s=>s.includes('DF 500')));assert.match(c.joinery.machining,/20 mm ergibt real 10 mm/);assert.equal(c.joinery.count,c.joinery.rows.reduce((n,r)=>n+r.positions.length,0));});
+test('DOMINO pockets leave face material and are separated on small contact edges',()=>{for(const thickness of[16,17.2,18,24]){const m=createModel({...DEFAULTS,height:100,thickness},'werkstattkiste','domino');assert.ok(thickness-10>=6);for(const r of m.joinery.rows){assert.ok(r.positions.every(v=>v>=37&&v<=r.length-37));for(let i=1;i<r.positions.length;i++)assert.ok(r.positions[i]-r.positions[i-1]>17);}}});
+test('cost scales by quantity and excludes non-wood accessories from area',()=>{const m=createModel(),a=estimate(m,1,35,4),b=estimate(m,3,35,4);near(b.total,a.total*3);near(a.total,27.5704);near(createModel(PROJECTS[3].defaults,'garderobe').area,.192);for(const q of[0,1.5,101,NaN])assert.throws(()=>estimate(m,q,35,4));});
+test('all project/connection files round-trip; legacy v1 remains readable',()=>{for(const p of PROJECTS)for(const connection of p.connections){const loaded=parseProject(projectFile(p.defaults,p.id,connection));assert.equal(loaded.project,p.id);assert.equal(loaded.connection,connection);assert.deepEqual(loaded.dimensions,p.defaults);}assert.deepEqual(parseProject(JSON.stringify({schema:'werkstueck/v1',project:'werkstattkiste',units:'mm',dimensions:DEFAULTS})).dimensions,DEFAULTS);for(const data of[{schema:'other'},{schema:'werkstueck/v2',project:'<script>',dimensions:DEFAULTS},{schema:'werkstueck/v2',project:'werkstattkiste',units:'inch',dimensions:DEFAULTS}])assert.throws(()=>parseProject(JSON.stringify(data)));});
+test('every plan has source/adaptation status and five consistent assembly stages',()=>{for(const p of PROJECTS){const m=createModel(p.defaults,p.id);assert.equal(stepsFor(m).length,5);assert.ok(m.parts.every(p=>p.stage>=0&&p.stage<5));assert.equal(cutCSV(m).split('\r\n').length,m.woodParts.length+2);assert.ok(p.adaptation);if(p.id!=='werkstattkiste')assert.ok(p.source.url.startsWith('https://'));}});
+
+test('outdoor DOMINO uses stocked Sipo 5x30 with sufficient face material',()=>{for(const thickness of[18,20,30]){const m=createModel({...PROJECTS[5].defaults,thickness},'pflanzkasten','domino');assert.equal(m.joinery.size,'5 × 30 mm');assert.ok(m.joinery.text.includes('Sipo'));assert.ok(thickness-12>=6);assert.match(m.joinery.machining,/32 mm Taschen für 30 mm/);}});

@@ -1,0 +1,189 @@
+{
+  "version": "0.2.0",
+  "reviewDate": "2026-11-09",
+  "sourcesAreStatic": true,
+  "projects": [
+    {
+      "project": "werkstattkiste",
+      "source": null,
+      "adaptation": "Eigener Werkstück-Entwurf. Keine externe Maßvorlage.",
+      "defaultDimensions": {
+        "width": 600,
+        "depth": 360,
+        "height": 200,
+        "thickness": 18
+      },
+      "checks": [
+        {
+          "name": "Positive Zuschnittmaße",
+          "pass": true
+        },
+        {
+          "name": "Materialstärke in allen Holzteilen",
+          "pass": true
+        },
+        {
+          "name": "Verbindungsmittel liegen innerhalb der Kontaktkante",
+          "pass": true
+        },
+        {
+          "name": "Stirnwand + 2 Materialstärken = Außentiefe",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "project": "nistkasten",
+      "source": {
+        "title": "NABU: Höhlenbrüter-Nistkasten",
+        "url": "https://www.nabu.de/aktiv-werden/tieren-helfen/nistkaesten-bauen/bauanleitung-hoehlenbrueter-nistkasten",
+        "facts": "NABU empfiehlt 18-mm-Massivholz, Schrauben, vier Bodenlöcher Ø 5 mm und mindestens 170 mm von Boden bis Lochunterkante."
+      },
+      "adaptation": "Eigene Flachdach-Variante mit 150 × 150 mm Innenboden im Grundmaß; kein maßgleicher Nachbau der NABU-Zeichnung. Dach wetterfest abdecken und den Kasten leicht nach vorn geneigt anbringen.",
+      "defaultDimensions": {
+        "width": 186,
+        "depth": 186,
+        "height": 280,
+        "thickness": 18
+      },
+      "checks": [
+        {
+          "name": "Positive Zuschnittmaße",
+          "pass": true
+        },
+        {
+          "name": "Materialstärke in allen Holzteilen",
+          "pass": true
+        },
+        {
+          "name": "Innenboden mindestens 140 × 140 mm, Lochunterkante ≥ 170 mm",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "project": "seilbaum",
+      "source": {
+        "title": "HORNBACH: DIY-Weihnachtsbaum",
+        "url": "https://media.hornbach.de/cmsm/de/diy-weihnachtsbaum.pdf",
+        "facts": "Die Vorlage nennt Lattenlängen von 600, 450 und 300 mm, sechs Bohrungen Ø 6 mm, 50 mm Randabstand und 200 mm Knotenabstand."
+      },
+      "adaptation": "Die drei Ausgangslängen und Bohrungen stimmen überein. Unsere Variante definiert den Abstand zwischen Lattenmitten; die Quelle misst zwischen Knoten. Querschnitt und obere Schlaufe sind eigene Festlegungen.",
+      "defaultDimensions": {
+        "width": 600,
+        "depth": 40,
+        "height": 200,
+        "thickness": 18
+      },
+      "checks": [
+        {
+          "name": "Positive Zuschnittmaße",
+          "pass": true
+        },
+        {
+          "name": "Materialstärke in allen Holzteilen",
+          "pass": true
+        },
+        {
+          "name": "Lattenproportionen 1 / 0,75 / 0,5; Ø 6 mm bleibt fest",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "project": "garderobe",
+      "source": {
+        "title": "t-online: Garderobe in sieben Schritten",
+        "url": "https://www.t-online.de/heim-garten/wohnen/id_74643572/garderobe-selber-bauen-in-sieben-schritten.html",
+        "facts": "Die öffentliche Anleitung verwendet ein 600 × 200 mm großes Brett mit fünf Haken."
+      },
+      "adaptation": "Diese Ausgangsmaße und die Hakenanzahl sind übernommen. Ablage, Materialstärke und parametrische Hakenverteilung sind eigenständige Ergänzungen; Metallhaken werden im Modell schematisch dargestellt.",
+      "defaultDimensions": {
+        "width": 600,
+        "depth": 120,
+        "height": 200,
+        "thickness": 18
+      },
+      "checks": [
+        {
+          "name": "Positive Zuschnittmaße",
+          "pass": true
+        },
+        {
+          "name": "Materialstärke in allen Holzteilen",
+          "pass": true
+        },
+        {
+          "name": "Verbindungsmittel liegen innerhalb der Kontaktkante",
+          "pass": true
+        },
+        {
+          "name": "Fünf gleichmäßig verteilte Haken",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "project": "utensilo",
+      "source": {
+        "title": "Bosch DIY: Wandregal aus Holzlatten",
+        "url": "https://www.bosch-diy.com/at/de/all-about-diy/diy-wandregal-holzlatten",
+        "facts": "Bosch nennt 8–12 Latten à 600 × 90 × 20 mm, etwa 60 mm Zwischenraum und bei neun Latten zwei Bänder à 1370 mm."
+      },
+      "adaptation": "Unsere Grundvariante nutzt neun Latten und 60 mm Zwischenraum. Freie Höhen verteilen die Zwischenräume neu. Bandlänge: Gesamthöhe plus 80 mm Zugabe; obere Schlaufen am tatsächlichen Beschlag abstimmen.",
+      "defaultDimensions": {
+        "width": 600,
+        "depth": 90,
+        "height": 1290,
+        "thickness": 20
+      },
+      "checks": [
+        {
+          "name": "Positive Zuschnittmaße",
+          "pass": true
+        },
+        {
+          "name": "Materialstärke in allen Holzteilen",
+          "pass": true
+        },
+        {
+          "name": "9 Latten + 8 Zwischenräume = Gesamthöhe",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "project": "pflanzkasten",
+      "source": {
+        "title": "MDR Garten: Blumenkasten selber bauen",
+        "url": "https://www.mdr.de/mdr-garten/gestalten/gartenelemente/pflanzen-pflanzkasten-kasten-blumenkasten-diy-selber-bauen-anleitung-100~_backId-pflanzkasten--pflanzen--kasten--blumenkasten--selber--bauen--anleitung--diy--100.html",
+        "facts": "Die öffentliche Anleitung zeigt einen verschraubten Bretterkasten, vorgebohrte Verbindungen, Entwässerungslöcher und eine Innenauskleidung."
+      },
+      "adaptation": "Eigener Zuschnitt mit geraden Brettern, ohne Waldkante. Unsere Ausgangsmaße 500 × 270 × 290 mm sind eine eigene Festlegung; mit der Quelle besteht keine belegte Maßgleichheit.",
+      "defaultDimensions": {
+        "width": 500,
+        "depth": 270,
+        "height": 270,
+        "thickness": 20
+      },
+      "checks": [
+        {
+          "name": "Positive Zuschnittmaße",
+          "pass": true
+        },
+        {
+          "name": "Materialstärke in allen Holzteilen",
+          "pass": true
+        },
+        {
+          "name": "Verbindungsmittel liegen innerhalb der Kontaktkante",
+          "pass": true
+        },
+        {
+          "name": "Stirnwand + 2 Materialstärken = Außentiefe",
+          "pass": true
+        }
+      ]
+    }
+  ]
+}

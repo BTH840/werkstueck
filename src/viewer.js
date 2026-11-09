@@ -1,3 +1,4 @@
+import {drawGpu} from './gpu.js';
 // Dependency-free orthographic 3D renderer. Geometry comes only from the shared model.
 const faces = [[0,3,2,1],[4,5,6,7],[0,1,5,4],[3,7,6,2],[0,4,7,3],[1,2,6,5]];
 const shades = ['#b18d59','#dbb882','#c09a65','#eed2a0','#c7a16e','#dfbd87'];
@@ -18,25 +19,27 @@ export class Viewer {
   this.w=r.width;this.h=r.height;const dpr=Math.min(window.devicePixelRatio||1,2);
   if(c.width!==Math.round(r.width*dpr)||c.height!==Math.round(r.height*dpr)){c.width=Math.round(r.width*dpr);c.height=Math.round(r.height*dpr);}
   ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,this.w,this.h);
-  const extent=Math.max(this.model.dimensions.width,this.model.dimensions.depth*1.5,450);
+  const extent=Math.max(this.model.overall[0],this.model.overall[1]*1.3,this.model.overall[2]*1.1,250);
   this.scale=Math.min(this.w/(extent*1.65),this.h/(extent*.96))*this.zoom;
   this.grid();
   this.polygons=[];
   for(const p of this.model.parts.filter(p=>p.stage<=this.stage)){
    const [a,b,d]=p.size.map(n=>n/2),center=p.center.map((n,i)=>n+p.explode[i]*this.explode);
-   const vertices=[[-a,-b,-d],[a,-b,-d],[a,b,-d],[-a,b,-d],[-a,-b,d],[a,-b,d],[a,b,d],[-a,b,d]].map(v=>this.project(v.map((n,i)=>n+center[i])));
-   faces.forEach((face,i)=>{const points=face.map(n=>vertices[n]);this.polygons.push({points,depth:points.reduce((s,v)=>s+v[2],0)/4,part:p,color:shades[i],face:i});});
+   const transform=v=>{const r=p.rotationZ||0;return this.project([v[0]*Math.cos(r)-v[1]*Math.sin(r)+center[0],v[0]*Math.sin(r)+v[1]*Math.cos(r)+center[1],v[2]+center[2]]);};
+   const vertices=[[-a,-b,-d],[a,-b,-d],[a,b,-d],[-a,b,-d],[-a,-b,d],[a,-b,d],[a,b,d],[-a,b,d]].map(transform);
+   faces.forEach((face,i)=>{const points=face.map(n=>vertices[n]);const holes=(i<2?p.holes||[]:[]).map(h=>Array.from({length:40},(_,j)=>{const angle=j/40*Math.PI*2;return transform([h.x+Math.cos(angle)*h.r,h.y+Math.sin(angle)*h.r,i===0?-d:d]);}));this.polygons.push({points,holes,depth:points.reduce((s,v)=>s+v[2],0)/4,part:p,color:p.color||shades[i],face:i});});
   }
   this.polygons.sort((a,b)=>a.depth-b.depth);
-  for(const poly of this.polygons){
+  if(!drawGpu(this,this.model.parts.filter(p=>p.stage<=this.stage)))for(const poly of this.polygons){
    ctx.beginPath();poly.points.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.closePath();
-   ctx.fillStyle=poly.part.id===this.selected?'#bf6742':poly.color;ctx.fill();ctx.strokeStyle='rgba(75,57,34,.30)';ctx.lineWidth=.8;ctx.stroke();
-   ctx.save();ctx.clip();const v=poly.points[0],u=poly.points[1],end=poly.points[3];
+   for(const hole of poly.holes){hole.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.closePath();}
+   ctx.fillStyle=poly.part.id===this.selected?'#bf6742':poly.color;ctx.fill('evenodd');ctx.strokeStyle='rgba(75,57,34,.30)';ctx.lineWidth=.8;ctx.stroke();
+   ctx.save();ctx.clip('evenodd');const v=poly.points[0],u=poly.points[1],end=poly.points[3];
    ctx.strokeStyle=poly.part.id===this.selected?'rgba(255,237,208,.20)':'rgba(105,73,34,.12)';ctx.lineWidth=.65;
-   for(let j=1;j<19;j++){const f=j/19;ctx.beginPath();ctx.moveTo(v[0]+(end[0]-v[0])*f,v[1]+(end[1]-v[1])*f);ctx.lineTo(u[0]+(poly.points[2][0]-u[0])*f,u[1]+(poly.points[2][1]-u[1])*f);ctx.stroke();}ctx.restore();
+   for(let j=1;j<(poly.part.cut?19:1);j++){const f=j/19;ctx.beginPath();ctx.moveTo(v[0]+(end[0]-v[0])*f,v[1]+(end[1]-v[1])*f);ctx.lineTo(u[0]+(poly.points[2][0]-u[0])*f,u[1]+(poly.points[2][1]-u[1])*f);ctx.stroke();}ctx.restore();
   }
   if(this.explode>.5||this.options.labels){
-   for(const p of this.model.parts.filter(p=>p.stage<=this.stage)){
+   for(const p of this.model.parts.filter(p=>p.stage<=this.stage&&p.cut)){
     const pos=this.project(p.center.map((n,i)=>n+p.explode[i]*this.explode));ctx.fillStyle=p.id===this.selected?'#ad512f':'#263e36';ctx.beginPath();ctx.arc(pos[0],pos[1],13,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.font='10px ui-monospace, monospace';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(p.id,pos[0],pos[1]);
    }
   }
