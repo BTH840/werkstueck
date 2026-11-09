@@ -16,7 +16,7 @@ export class PhotoWorkbench{
   this.q('import').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{if(f.size>200000)throw Error('Entwurfsdatei zu groß.');const raw=JSON.parse(await f.text());if(raw.schema!=='werkstueck/photo-v1')throw Error('Das ist kein Fotoprojekt.');this.draft=normalizePhotoDraft(raw);this.manual=null;this.save();this.renderDraft();this.go(1);this.message('Fotoprojekt geöffnet.');}catch(err){this.message(err.message);}finally{e.target.value='';}};
   this.q('pdf').onclick=()=>this.exportPDF();this.q('explode').onclick=()=>{if(this.viewer){this.viewer.explode=this.viewer.explode?0:1;this.viewer.draw();}};
   root.querySelectorAll('[data-photo-camera]').forEach(b=>b.onclick=()=>this.viewer?.setView(b.dataset.photoCamera));
-  this.renderService();this.checkService();this.renderDraft();
+  this.renderService();this.checkService();this.renderDraft();this.go(0);
  }
  message(s){this.status.textContent=s;}
  save(){if(!this.draft)return;try{localStorage.setItem(this.storageKey,photoDraftFile(this.draft));}catch{this.message('Speicher voll. Bitte Entwurf als Datei speichern.');}}
