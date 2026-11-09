@@ -47,3 +47,21 @@ test('all boards share the visible faces and project shared edges consistently',
 test('course remains limited to the DOMINO coat-rack construction',()=>{
  for(const p of PROJECTS)for(const connection of p.connections)assert.equal(Boolean(workshopFor(createModel(p.defaults,p.id,connection))),p.id==='garderobe'&&connection==='domino');
 });
+
+// Independent coverage fixtures ensure every supplied hole has both edge dimensions.
+test('each bore and pocket is dimensioned from its datum on the workpiece',()=>{
+ const c=workshopFor(createModel(defaults,'garderobe','domino',hardware));
+ assert.equal(c.steps.length,17);assert.equal(c.steps.filter(s=>s.figure==='drill-hook').length,5);
+ const dims=svg=>[...svg.matchAll(/<g data-dimension-axis="([^"]+)" data-from-edge="([^"]+)" data-hole-ids="([^"]+)" data-mm="([^"]+)"/g)].map(m=>({axis:m[1],edge:m[2],ids:m[3].split(' '),mm:Number(m[4])}));
+ for(const step of c.steps.filter(s=>s.figure==='drill-hook')){
+  const d=dims(workshopSVG(c,step)),rows=c.hookBores.filter(r=>r.hookIndex===step.hookIndex);
+  for(const r of rows){assert.ok(d.some(v=>v.axis==='x'&&v.edge==='left'&&v.ids.includes(r.id)&&v.mm===r.x));assert.ok(d.some(v=>v.axis==='y'&&v.edge==='top'&&v.ids.includes(r.id)&&v.mm===r.y));}
+ }
+ for(const figure of['mark-edge','route-edge','mark-face','route-face']){
+  const face=figure.endsWith('face'),d=dims(workshopSVG(c,c.steps.find(s=>s.figure===figure)));
+  for(const r of c.pockets.filter(r=>r.part===(face?'02':'01'))){assert.ok(d.some(v=>v.axis==='x'&&v.edge==='left'&&v.ids.includes(r.id)&&v.mm===r.x));assert.ok(d.some(v=>v.axis==='offset'&&v.edge===(face?'rear-edge':'rear-face')&&v.ids.includes(r.id)&&v.mm===9));}
+ }
+ const wall=dims(workshopSVG(c,c.steps.find(s=>s.figure==='drill-board')));
+ assert.ok(wall.some(v=>v.axis==='x'&&v.mm===50&&v.ids.includes('W1/M1')));assert.ok(wall.some(v=>v.axis==='x'&&v.mm===550&&v.ids.includes('W2/M2')));
+ assert.ok(wall.some(v=>v.axis==='y'&&v.mm===50&&v.ids.includes('W1/M1')&&v.ids.includes('W2/M2')));
+});

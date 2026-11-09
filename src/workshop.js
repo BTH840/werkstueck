@@ -1,5 +1,5 @@
 // Part-led picture plan. All pockets and bores share one measurement model.
-export const WORKSHOP_REVISION='df500-garderobe-v4';
+export const WORKSHOP_REVISION='df500-garderobe-v5';
 export const WORKSHOP_SOURCES=[
  {title:'Festool DOMINO-Anwenderhandbuch',url:'https://www.festool.ch/-/media/tts/fcp/festool/knowledge/downloads-page/download-brochures/manual_domino/manual_domino_system.pdf',note:'DF 500 Q, D-4-Spezialfräser: Rastung 20 = real 10 mm. Eigene Zeichnungen und Arbeitsfolge.'},
  {title:'Festool Betriebsanleitung',url:'https://media.cdn.festool.io/productmedia/Images/attachment/d2e7333e-3714-11f0-8a62-005056b3ad01.pdf',note:'Betriebsanleitung der verwendeten Maschine beachten; sichere Aufspannung und Probe an Restholz.'}
@@ -38,6 +38,7 @@ export function workshopFor(m){
    step('fraesen-01','Bohren & Fräsen','Hakenbrett fräsen','route-edge','01'),
    step('fraesen-02','Bohren & Fräsen','Ablage fräsen','route-face','02'),
    step('bohrpunkte','Bohren & Fräsen','Bohrpunkte · jedes Loch einzeln','drill-board','01'),
+   ...[...new Set(hookBores.map(r=>r.hookIndex))].map(i=>({...step('hakenmasse-'+i,'Bohren & Fräsen','Haken '+(i+1)+' · Bohrmaße','drill-hook','01'),hookIndex:i})),
    step('duebel','Zusammensetzen','Dübel und Leim','dowels','01 + 02'),
    step('fuegen','Zusammensetzen','Zusammenfügen','join','01 + 02'),
    step('fertig','Zusammensetzen','Haken befestigen','finished','01 + 02')

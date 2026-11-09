@@ -36,20 +36,40 @@ function pocket(b,x,y,z,wide=17,edge=false){
  for(const side of[1,-1])for(let i=0;i<=12;i++){const angle=(side===1?-Math.PI/2:Math.PI/2)+Math.PI*i/12,dx=side*half+r*Math.cos(angle),dy=r*Math.sin(angle);pts.push(edge?b.p(x+dx,y,z+dy):b.p(x+dx,y+dy,z));}
  return `<g data-mark="pocket" data-x-mm="${x}" data-offset-mm="${edge?z:y}">${pg(pts,'#53624f')}</g>`;
 }
-function millingValues(c,edge){
- return box2(60,625,1080,100,'#f6f7f2')+txt(85,665,`DF 500 Q · D 4 · h ${f(c.axis)} · 90° · 20 → 10 mm`,25)+txt(85,705,edge?'01: eng':'02: 1 eng · weitere mittel',23)+txt(1115,705,'Probe: Restholz',20,accent,'end');
+// Baseline dimensions always start at a real edge, never at the previous hole.
+function baselineDimensions(b,rows,{edge=false,top=200,yDimensions=false}={}){
+ let out='';
+ const point=r=>edge?b.p(r.x,b.d,r.y):b.p(r.x,r.y);
+ const groups=new Map();
+ for(const r of rows){const key=r.x+','+r.y;if(!groups.has(key))groups.set(key,[]);groups.get(key).push(r);}
+ [...groups.values()].sort((a,b)=>b[0].x-a[0].x||b[0].y-a[0].y).forEach((group,i)=>{
+  const r=group[0],q=point(r),p=edge?b.p(0,b.d,r.y):b.p(0,r.y),row=top+i*35;
+  out+=`<g data-dimension-axis="x" data-from-edge="left" data-hole-ids="${group.map(r=>r.id).join(' ')}" data-mm="${r.x}">`;
+  for(const v of[p,...group.map(point)])out+=ln(v,[v[0],row-5],{color:'#b3bbb0',width:1});
+  out+=dim([p[0],row],[q[0],row],group.map(r=>r.id).join('/')+' · '+f(r.x),{size:21,y:row-8})+'</g>';
+ });
+ if(yDimensions){
+  const yGroups=new Map();for(const r of rows){if(!yGroups.has(r.y))yGroups.set(r.y,[]);yGroups.get(r.y).push(r);}
+  [...yGroups.values()].sort((a,b)=>b[0].y-a[0].y).forEach((group,i)=>{
+   const r=group[0],left=100+i*72,p=b.p(0,0),q=b.p(0,r.y),P=[left,p[1]],Q=[left+q[0]-p[0],q[1]];
+   out+=`<g data-dimension-axis="y" data-from-edge="top" data-hole-ids="${group.map(r=>r.id).join(' ')}" data-mm="${r.y}">`;
+   out+=ln(b.p(r.x,0),P,{color:'#b3bbb0',width:1});
+   for(const v of group)out+=ln(point(v),Q,{color:'#b3bbb0',width:1});
+   out+=dim(P,Q,f(r.y),{size:23,x:left-30,y:(P[1]+Q[1])/2+7})+'</g>';
+  });
+ }
+ return out;
 }
-function smallAxis(c,face=false){
- let a=box2(60,520,465,135)+txt(80,549,face?'U · R → '+f(c.axis)+' mm':'R → '+f(c.axis)+' mm',21);
- // Detail retains the same projection and all visible thickness faces.
- const b=partBoard(75,face?22:c.dimensions.height/6,c.dimensions.thickness,{x:90,y:580,maxW:300,maxH:65});a+=b.art;
- const p=face?b.p(37.5,c.axis):b.p(37.5,b.d,c.axis);
- a+=ln(face?b.p(0,c.axis):b.p(0,b.d,c.axis),face?b.p(75,c.axis):b.p(75,b.d,c.axis),{color:accent,dash:true})+mark(p)+txt(465,610,f(c.axis)+' mm',21,accent,'end');
- return a;
-}
-function depthSection(c){
- const t=c.dimensions.thickness;
- return box2(575,500,565,105)+txt(595,525,'SCHNITT',18)+box2(650,545,360,40)+`<rect x="800" y="545" width="25" height="${40*10/t}" fill="#c1cbbb"/>`+dim([625,545],[625,545+40*10/t],'10',{x:603,y:565,size:20})+txt(1050,580,f(t-10)+' mm',20,ink,'middle');
+function axisDetail(c,face,rows){
+ const t=c.dimensions.thickness,b=partBoard(65,30,t,{x:125,y:610,maxW:300,maxH:95}),ids=rows.map(r=>r.id).join(' ');
+ let out=box2(60,505,420,200,'#fafbf7')+txt(80,534,'Detail · '+rows.map(r=>r.id).join(' / '),21)+b.art;
+ const point=face?b.p(35,c.axis):b.p(35,b.d,c.axis),start=face?b.p(35,0):b.p(35,b.d,t);
+ const P=face?[95,start[1]]:[point[0]+100,start[1]],Q=face?[95+point[0]-start[0],point[1]]:[point[0]+100,point[1]];
+ out+=ln(face?b.p(0,c.axis):b.p(0,b.d,c.axis),face?b.p(65,c.axis):b.p(65,b.d,c.axis),{color:accent,dash:true})+mark(point);
+ out+=`<g data-dimension-axis="offset" data-from-edge="${face?'rear-edge':'rear-face'}" data-hole-ids="${ids}" data-mm="${c.axis}">`+ln(start,P,{color:muted,width:1})+ln(point,Q,{color:muted,width:1})+dim(P,Q,f(c.axis),{x:face?80:P[0]+30,y:(P[1]+Q[1])/2+7,size:23})+'</g>';
+ out+=txt(80,688,face?'ab Hinterkante':'ab Rückseite',20);
+ // The reference line terminates on the actual datum edge/face of the enlarged board.
+ out+=ln([250,680],start,{color:muted,width:1});return out;
 }
 function cutPart(c,shelf){
  const {width:w,height:h,depth:d,thickness:t}=c.dimensions,depth=shelf?d:h;
@@ -59,25 +79,30 @@ function cutPart(c,shelf){
  a+=dot(105,150,shelf?'02':'01')+txt(140,158,'1×',25)+txt(600,650,[w,depth,t].map(f).join(' × ')+' mm',34,ink,'middle');return a;
 }
 function pocketTable(c,face){
- const rows=c.pockets.filter(p=>p.part===(face?'02':'01'));let out=box2(60,495,1080,200,'#fafbf7');
- const cols=[85,260,485,705,970];['ID','ab links',face?'ab Hinterkante':'ab Rückseite','Schlitz','Tiefe'].forEach((v,i)=>out+=txt(cols[i],525,v,21,muted));
- rows.forEach((r,i)=>{const y=560+i*34;[r.id,f(r.x),f(r.y),f(r.width)+' × '+f(r.height),f(r.depth)].forEach((v,j)=>out+=txt(cols[j],y,v,25));});
- return out+txt(85,733,'DF 500 Q · D 4 · h '+f(c.axis)+' · 90° · 20 → 10 mm',23);
+ const rows=c.pockets.filter(p=>p.part===(face?'02':'01'));let out=box2(505,505,635,200,'#fafbf7');
+ const cols=[530,700,970];['ID','Schlitz','Tiefe'].forEach((v,i)=>out+=txt(cols[i],534,v,21,muted));
+ rows.forEach((r,i)=>{const y=569+i*32;[r.id,f(r.width)+' × '+f(r.height),f(r.depth)].forEach((v,j)=>out+=txt(cols[j],y,v,24));});
+ return out+txt(85,740,'DF 500 Q · D 4 · h '+f(c.axis)+' · 90° · 20 → 10 mm',23);
 }
 function millPart(c,face,finished){
- const {width:w,height:h,depth:d,thickness:t}=c.dimensions,depth=face?d:h,b=partBoard(w,depth,t,{y:280,maxH:170});let out=b.art;
+ const {width:w,height:h,depth:d,thickness:t}=c.dimensions,depth=face?d:h,b=partBoard(w,depth,t,{x:160,y:345,maxW:890,maxH:135}),rows=c.pockets.filter(r=>r.part===(face?'02':'01'));let out=b.art;
  out+=ln(face?b.p(0,c.axis):b.p(0,depth,c.axis),face?b.p(w,c.axis):b.p(w,depth,c.axis),{color:accent,dash:true,width:2.5});
- for(const r of c.pockets.filter(r=>r.part===(face?'02':'01'))){const p=face?b.p(r.x,c.axis):b.p(r.x,depth,c.axis);out+=ln(b.p(r.x,0),b.p(r.x,depth),{color:muted,dash:true,width:1});if(!face)out+=ln(b.p(r.x,depth),b.p(r.x,depth,0),{color:muted,dash:true,width:1});out+=finished?pocket(b,r.x,face?c.axis:depth,face?t:c.axis,r.width,!face):mark(p);out+=txt(p[0]+14,p[1]-12,r.id,20,accent);}
- out+=dot(105,140,face?'02':'01')+txt(145,148,face?'Unterseite':'Rückseite',28)+txt(77,b.p(0,0)[1],'L',24,accent)+pocketTable(c,face);return out;
+ for(const r of rows){const p=face?b.p(r.x,c.axis):b.p(r.x,depth,c.axis);out+=ln(b.p(r.x,0),b.p(r.x,depth),{color:muted,dash:true,width:1});if(!face)out+=ln(b.p(r.x,depth),b.p(r.x,depth,0),{color:muted,dash:true,width:1});out+=finished?pocket(b,r.x,face?c.axis:depth,face?t:c.axis,r.width,!face):mark(p);out+=txt(p[0]+14,p[1]+27,r.id,20,accent);}
+ out+=baselineDimensions(b,rows,{edge:!face,top:190});
+ out+=dot(105,140,face?'02':'01')+txt(145,148,face?'Unterseite':'Rückseite',28)+txt(138,b.p(0,0)[1]-10,'links',20,accent,'end')+axisDetail(c,face,rows)+pocketTable(c,face);return out;
 }
-function drillPart(c){
- const {width:w,height:h,thickness:t}=c.dimensions,b=partBoard(w,h,t,{y:280,maxH:150});let out=b.art+dot(100,140,'01')+txt(150,148,'Vorderseite',23);
- for(const row of [h/4,h/2])out+=ln(b.p(0,row),b.p(w,row),{color:muted,dash:true,width:1});
- for(const r of c.boardBores){const p=b.p(r.x,r.y);out+=`<g data-mark="wall-point" data-x-mm="${r.x}" data-y-mm="${r.y}">${mark(p)}</g>`+txt(p[0]+15,p[1]-12,r.id+'/M'+r.id.slice(1),19,accent);}
- for(const r of c.hookBores){const p=b.p(r.x,r.y);out+=`<g data-mark="hook-bore" data-hole-id="${r.id}" data-x-mm="${r.x}" data-y-mm="${r.y}">${ln([p[0]-4,p[1]],[p[0]+4,p[1]],{color:accent})}${ln([p[0],p[1]-4],[p[0],p[1]+4],{color:accent})}<circle cx="${p[0]}" cy="${p[1]}" r="5" fill="none" stroke="${accent}"/></g>`+txt(p[0]+13,p[1]+(r.patternIndex?20:-14),r.id,17,accent);}
+function drillPart(c,hookIndex){
+ const detail=hookIndex!==undefined,{width:w,height:h,thickness:t}=c.dimensions,b=partBoard(w,h,t,{x:250,y:305,maxW:800,maxH:140}),hookRows=detail?c.hookBores.filter(r=>r.hookIndex===hookIndex):c.hookBores,wallRows=detail?[]:c.boardBores;
+ let out=b.art+dot(100,140,'01')+txt(150,148,detail?'Vorderseite · Haken '+(hookIndex+1):'Vorderseite',23);
+ for(const row of new Set([...hookRows,...wallRows].map(r=>r.y)))out+=ln(b.p(0,row),b.p(w,row),{color:muted,dash:true,width:1});
+ for(const r of wallRows){const p=b.p(r.x,r.y);out+=`<g data-mark="wall-point" data-x-mm="${r.x}" data-y-mm="${r.y}">${mark(p)}</g>`+txt(p[0]+15,p[1]+27,r.id+'/M'+r.id.slice(1),19,accent);}
+ for(const r of hookRows){const p=b.p(r.x,r.y);out+=`<g data-mark="hook-bore" data-hole-id="${r.id}" data-x-mm="${r.x}" data-y-mm="${r.y}">${ln([p[0]-5,p[1]],[p[0]+5,p[1]],{color:accent})}${ln([p[0],p[1]-5],[p[0],p[1]+5],{color:accent})}<circle cx="${p[0]}" cy="${p[1]}" r="6" fill="none" stroke="${accent}"/></g>`+txt(p[0]+13,p[1]+(r.patternIndex?23:-14),r.id,17,accent);}
  if(!c.hookBores.length)for(const r of c.hookCenters){const p=b.p(r.x,r.y);out+=ln([p[0],p[1]-5],[p[0],p[1]+5],{color:muted,width:2});}
- out+=txt(70,446,'H: Haken · W: Holz · M: Wand',21,muted)+txt(70,474,c.hookBores.length?'x: ab links · y: ab oben · mm':'Haken: Lochbild offen · x: ab links · y: ab oben · mm',23,muted);
- const rows=[...c.hookBores,...c.boardBores,...c.wallBores],columns=rows.length>6?2:1,per=Math.ceil(rows.length/columns),cw=1080/columns;
+ const measured=detail?hookRows:wallRows.map(r=>({...r,id:r.id+'/M'+r.id.slice(1)}));
+ out+=baselineDimensions(b,measured,{top:200,yDimensions:true});
+ out+=txt(235,b.p(0,0)[1]-12,'oben',19,accent)+txt(235,b.p(0,h)[1]+20,'links',19,accent,'end');
+ out+=txt(70,463,detail?'Ab linker Kante / ab Oberkante → Lochmitte':c.hookBores.length?'Hakenmaße: nächste Bilder':'Haken: Lochbild offen',23,muted);
+ const rows=detail?hookRows:[...c.hookBores,...c.boardBores,...c.wallBores],columns=rows.length>6?2:1,per=Math.ceil(rows.length/columns),cw=1080/columns;
  for(let col=0;col<columns;col++){
   const left=60+col*cw;out+=box2(left,495,cw-10,237,'#fafbf7');const offsets=columns===1?[20,200,420,650,850]:[12,87,192,302,405];
   ['ID','x','y','Ø','Tiefe'].forEach((v,j)=>out+=txt(left+offsets[j],525,v,21,muted));
@@ -118,6 +143,7 @@ export function workshopSVG(c,step){
   case 'route-edge':a=millPart(c,false,true);break;
   case 'route-face':a=millPart(c,true,true);break;
   case 'drill-board':a=drillPart(c);break;
+  case 'drill-hook':a=drillPart(c,step.hookIndex);break;
   case 'dowels':a=assembled(c,{lift:Math.max(140,c.dimensions.depth*1.45),dowels:true});break;
   case 'join':a=assembled(c);for(const X of[400,800])a+=arrow([X,210],[X,280]);a+=txt(600,705,'90° · bündig',30,ink,'middle');break;
   case 'finished':a=assembled(c,{finished:true});break;

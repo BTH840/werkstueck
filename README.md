@@ -123,3 +123,12 @@ Die Bildanleitung beginnt mit der fertigen Garderobe, danach folgt eine benannte
 Das Beschlagmodell ist ausdrücklich offen. Unter „Bohrbild festlegen“ können ein oder zwei Löcher pro Haken mit Versatz zur Hakenmitte, Durchmesser und Bohrtiefe einschließlich Bohrerspitze eingegeben werden. Jedes erzeugte Loch erhält eine H-Kennung und eigene absolute x/y-Maße ab linker bzw. oberer Brettkante. W bezeichnet den Holzdurchgang, M die dazugehörige Wandbohrung. Unbekannte Durchmesser und Tiefen bleiben als „offen“ sichtbar. Wandangaben sind Eingabewerte für den tatsächlichen Befestigungssatz, keine aus dem Untergrund berechneten Empfehlungen.
 
 Beschlagdaten werden je Variante im Browser und in der Entwurfsdatei gespeichert; PDF und Zeichnung verwenden denselben Stand. Die 23 automatisierten Prüfungen decken auch einzelne Lochkoordinaten, offene Beschläge, Eingabegrenzen und Dateirundlauf ab. Im Browser wurden ein zweilochiges Testmuster, Speicherung nach Neuladen, das Rücksetzen auf offene Beschläge sowie die zwölfseitige PDF geprüft. Ein praktischer Probebau steht weiterhin aus.
+
+
+## Version 0.7.0: Maßlinien direkt am Brett
+
+Jede Fräsposition hat eine absolute Maßlinie ab der linken Stirnkante. Eine vergrößerte räumliche Detailzeichnung zeigt den Achsabstand zur breiten Rückseite des Hakenbretts beziehungsweise zur Hinterkante der Ablage. Hilfslinien enden an den echten Bezugskanten und Lochmitten; es werden keine aufeinander addierten Lochabstände verwendet.
+
+Die beiden Wand-/Holzpositionen erhalten direkt am Hakenbrett Maße ab links und ab oben. Ist ein Haken-Lochbild eingegeben, ergänzen fünf einzelne Hakenzeichnungen die Übersicht. Jede Bohrung ist dort separat aus beiden Bezugskanten bemaßt. Die unveränderte offene Ausgangsvariante hat zwölf Bilder; mit bekanntem Lochbild sind es siebzehn. Bildschirm, Schrittzahl und Bild-PDF verwenden dieselbe dynamische Reihenfolge. Durchmesser und Tiefen bleiben offen, bis tatsächliche Beschlagdaten eingegeben werden.
+
+24 automatisierte Prüfungen; im Browser wurden Fräsdetail, beide Bezugskanten der Holzbohrung, ein zweilochiges Haken-Testmuster und dessen Rücksetzen geprüft. Die zwölfseitige Bild-PDF wurde neu erzeugt und visuell geprüft.

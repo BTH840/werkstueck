@@ -1,7 +1,7 @@
 import {number,stepsFor,toolsFor} from './core.js';
 import {workshopFor} from './workshop.js';
 // All measurements and joinery come from the current model, not from static plan text.
-export async function createPlan(model,{full=false,images=[],workshopImages=[],version='0.6.0'}={}){
+export async function createPlan(model,{full=false,images=[],workshopImages=[],version='0.7.0'}={}){
  const pictureCourse=full?workshopFor(model):null;if(pictureCourse)return createPicturePlan(model,pictureCourse,workshopImages,version);
  const {PDFDocument,StandardFonts,rgb}=globalThis.PDFLib,doc=await PDFDocument.create();
  const font=await doc.embedFont(StandardFonts.Helvetica),bold=await doc.embedFont(StandardFonts.HelveticaBold),serif=await doc.embedFont(StandardFonts.TimesRoman);
