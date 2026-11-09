@@ -1,5 +1,5 @@
 {
-  "name": "werkstueck", "version": "0.7.0", "private": true, "type": "module",
-  "scripts": {"dev":"node scripts/serve.mjs", "build":"node scripts/build.mjs", "test":"node --test src/*.test.js"},
+  "name": "werkstueck", "version": "0.8.0", "private": true, "type": "module",
+  "scripts": {"dev":"node scripts/serve.mjs", "local":"node scripts/build.mjs && node server/local.mjs", "build":"node scripts/build.mjs", "test":"node --test src/*.test.js"},
   "engines": {"node": ">=22"}
 }

@@ -1,3 +1,4 @@
+import {PhotoWorkbench} from './photo-ui.js';
 import {DEFAULTS,PROJECTS,CONNECTIONS,getProject,createModel,stepsFor,toolsFor,number,money,estimate,parseProject,projectFile,cutCSV,auditModel} from './core.js';
 import {Viewer} from './viewer.js';
 import {createPlan} from './pdf.js';
@@ -78,3 +79,7 @@ async function downloadPlan(full){
 }
 const topButton=$('back-to-top');const updateTop=()=>topButton.hidden=window.scrollY<500;window.addEventListener('scroll',updateTop,{passive:true});topButton.onclick=()=>{window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});document.querySelector('.brand').focus({preventScroll:true});};
 $('hardware-price').value=CONNECTIONS[model.connection].budget;library();populateForm();render();updateTop();if(location.hash==='#werkstattkurs'&&!$('werkstattkurs').hidden)requestAnimationFrame(()=>$('werkstattkurs').scrollIntoView({block:'start',behavior:'instant'}));
+
+document.querySelectorAll('[data-main-camera]').forEach(b=>b.onclick=()=>view.setView(b.dataset.mainCamera));
+
+const photoWorkbench=new PhotoWorkbench($('fotowerkstatt'),{environment:config.environment});

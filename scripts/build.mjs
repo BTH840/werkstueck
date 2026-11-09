@@ -9,7 +9,7 @@ const dist=path.join(root,'dist');await rm(dist,{recursive:true,force:true});awa
 for(const file of['index.html','mark.svg'])await copyFile(path.join(root,file),path.join(dist,file));
 await cp(path.join(root,'src'),path.join(dist,'src'),{recursive:true,filter:p=>!p.endsWith('.test.js')});
 await cp(path.join(root,'vendor'),path.join(dist,'vendor'),{recursive:true});
-const config={environment,version:'0.7.0',sourceSha:sha};
+const config={environment,version:'0.8.0',sourceSha:sha};
 // A release must never combine new HTML with cached modules from an older plan version.
 const stamp=encodeURIComponent(config.version+'-'+sha.slice(0,12));
 let html=await readFile(path.join(dist,'index.html'),'utf8');

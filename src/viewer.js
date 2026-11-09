@@ -1,18 +1,19 @@
 import {drawGpu} from './gpu.js';
+import {cameraPoint,CAMERA_VIEWS,boardCorners,partBounds,rotatePoint} from './geometry.js';
 // Dependency-free orthographic 3D renderer. Geometry comes only from the shared model.
 const faces = [[0,3,2,1],[4,5,6,7],[0,1,5,4],[3,7,6,2],[0,4,7,3],[1,2,6,5]];
 const shades = ['#b18d59','#dbb882','#c09a65','#eed2a0','#c7a16e','#dfbd87'];
 export class Viewer {
  constructor(canvas,model,options={}) {
   this.canvas=canvas; this.ctx=canvas.getContext('2d'); this.model=model; this.options=options;
-  this.yaw=-0.68; this.pitch=0.46; this.zoom=1; this.explode=options.explode??0; this.stage=4; this.selected=null; this.polygons=[];
+  this.yaw=-Math.PI/4; this.pitch=Math.atan(1/Math.sqrt(2)); this.zoom=1; this.explode=options.explode??0; this.stage=4; this.selected=null; this.polygons=[];
   this.resizeObserver=new ResizeObserver(()=>this.draw());this.resizeObserver.observe(canvas);
   if(options.interactive!==false) this.bind();
  }
+ setView(name){const values=CAMERA_VIEWS[name];if(!values)return;[this.yaw,this.pitch]=values;this.draw();}
  project([x,y,z]) {
-  const cy=Math.cos(this.yaw),sy=Math.sin(this.yaw),cp=Math.cos(this.pitch),sp=Math.sin(this.pitch);
-  const xx=x*cy+z*sy,zz=-x*sy+z*cy,yy=y-this.model.overall[2]*0.45;
-  return [this.w/2+xx*this.scale,this.h*0.49+(-yy*cp+zz*sp)*this.scale,yy*sp+zz*cp];
+  const center=this.options.fit?this.sceneCenter:[0,this.model.overall[2]*.45,0],p=cameraPoint([x-center[0],y-center[1],z-center[2]],this.yaw,this.pitch);
+  return [this.w/2+p[0]*this.scale,this.h*(this.options.fit?.5:.49)+p[1]*this.scale,p[2]];
  }
  draw() {
   const c=this.canvas,ctx=this.ctx,r=c.getBoundingClientRect();if(!r.width||!r.height)return;
@@ -21,11 +22,12 @@ export class Viewer {
   ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,this.w,this.h);
   const extent=Math.max(this.model.overall[0],this.model.overall[1]*1.3,this.model.overall[2]*1.1,250);
   this.scale=Math.min(this.w/(extent*1.65),this.h/(extent*.96))*this.zoom;
-  this.grid();
+  if(this.options.fit){const fitParts=this.model.parts.map(p=>({...p,center:p.center.map((n,i)=>n+p.explode[i]*this.explode)})),bounds=partBounds(fitParts);this.sceneCenter=bounds.map(v=>(v[0]+v[1])/2);const ps=fitParts.flatMap(boardCorners).map(p=>cameraPoint(p.map((v,i)=>v-this.sceneCenter[i]),this.yaw,this.pitch)),span=[0,1].map(i=>Math.max(...ps.map(p=>p[i]))-Math.min(...ps.map(p=>p[i])));this.scale=Math.min(this.w/Math.max(span[0]*1.3,100),this.h/Math.max(span[1]*1.3,100))*this.zoom;}
+  if(!this.options.noGrid)this.grid();
   this.polygons=[];
   for(const p of this.model.parts.filter(p=>p.stage<=this.stage)){
    const [a,b,d]=p.size.map(n=>n/2),center=p.center.map((n,i)=>n+p.explode[i]*this.explode);
-   const transform=v=>{const r=p.rotationZ||0;return this.project([v[0]*Math.cos(r)-v[1]*Math.sin(r)+center[0],v[0]*Math.sin(r)+v[1]*Math.cos(r)+center[1],v[2]+center[2]]);};
+   const transform=v=>this.project(rotatePoint(v,p).map((n,i)=>n+center[i]));
    const vertices=[[-a,-b,-d],[a,-b,-d],[a,b,-d],[-a,b,-d],[-a,-b,d],[a,-b,d],[a,b,d],[-a,b,d]].map(transform);
    faces.forEach((face,i)=>{const points=face.map(n=>vertices[n]);const holes=(i<2?p.holes||[]:[]).map(h=>Array.from({length:40},(_,j)=>{const angle=j/40*Math.PI*2;return transform([h.x+Math.cos(angle)*h.r,h.y+Math.sin(angle)*h.r,i===0?-d:d]);}));this.polygons.push({points,holes,depth:points.reduce((s,v)=>s+v[2],0)/4,part:p,color:p.color||shades[i],face:i});});
   }
@@ -64,6 +66,6 @@ export class Viewer {
   this.canvas.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','+','-','Home'].includes(e.key))return;e.preventDefault();if(e.key==='ArrowLeft')this.yaw-=.12;if(e.key==='ArrowRight')this.yaw+=.12;if(e.key==='ArrowUp')this.pitch=Math.min(1.3,this.pitch+.1);if(e.key==='ArrowDown')this.pitch=Math.max(-.8,this.pitch-.1);if(e.key==='+')this.changeZoom(.1);if(e.key==='-')this.changeZoom(-.1);if(e.key==='Home')this.reset();this.draw();});
  }
  changeZoom(delta){this.zoom=Math.min(1.8,Math.max(.6,this.zoom+delta));this.draw();}
- reset(){this.yaw=-.68;this.pitch=.46;this.zoom=1;this.draw();}
+ reset(){this.yaw=-Math.PI/4;this.pitch=Math.atan(1/Math.sqrt(2));this.zoom=1;this.draw();}
  update(model){this.model=model;this.draw();}
 }

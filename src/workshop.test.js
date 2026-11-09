@@ -40,9 +40,9 @@ test('every pocket and supplied bore follows free dimensions',()=>{
  }
 });
 test('all boards share the visible faces and project shared edges consistently',()=>{
- const faces=partBlockGeometry(600,120,18),ray=[-.42,1,.70/.90];assert.deepEqual(faces.map(f=>f.face),['left','front','top']);
+ const faces=partBlockGeometry(600,120,18),ray=[-1,1,1];assert.deepEqual(faces.map(f=>f.face),['left','front','top']);
  for(const face of faces){assert.equal(face.points.length,4);assert.ok(face.normal.reduce((s,n,i)=>s+n*ray[i],0)>0);}
- assert.deepEqual(partProjection(0,120,0),[50.4,84]);const top=partProjection(0,120,18),bottom=partProjection(0,120,0);assert.ok(Math.abs(bottom[1]-top[1]-16.2)<1e-9);
+ assert.ok(Math.abs(partProjection(0,120,0)[0]-120/Math.sqrt(2))<1e-9);const top=partProjection(0,120,18),bottom=partProjection(0,120,0);assert.ok(Math.abs(bottom[1]-top[1]-36/Math.sqrt(6))<1e-9);
 });
 test('course remains limited to the DOMINO coat-rack construction',()=>{
  for(const p of PROJECTS)for(const connection of p.connections)assert.equal(Boolean(workshopFor(createModel(p.defaults,p.id,connection))),p.id==='garderobe'&&connection==='domino');

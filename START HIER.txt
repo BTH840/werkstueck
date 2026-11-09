@@ -1,0 +1,18 @@
+WERKSTÜCK · LOKALE FOTOWERKSTATT
+
+1. Das ZIP vollständig entpacken.
+2. „Werkstueck lokal starten.command“ doppelklicken.
+3. Im geöffneten Browser unter „Lokale Bildanalyse“ deinen eigenen OpenAI-API-Schlüssel eingeben. Er bleibt im Arbeitsspeicher des lokalen Dienstes. Nicht hier im Chat eingeben.
+4. Ein bis acht Fotos hinzufügen, ein echtes Kontrollmaß angeben und „Fotos analysieren“ wählen. Dabei werden verkleinerte Fotos und Angaben an OpenAI gesendet; API-Nutzung ist kostenpflichtig.
+5. Rückfragen beantworten, Maße/Schnittform und Montagefolge prüfen. Unbekanntes bleibt offen.
+6. Verbindung und jedes erforderliche Bohrbild festlegen, Modell prüfen, dann die Bildanleitung erzeugen.
+
+Voraussetzung: Node.js 22 oder neuer. Falls es fehlt: https://nodejs.org
+Die Startdatei öffnet http://127.0.0.1:4174/#fotowerkstatt. Der Dienst ist nur auf diesem Mac erreichbar. Mit Ctrl+C im zugehörigen Terminalfenster beenden. Es werden keine Schlüssel in Dateien gespeichert.
+
+GRENZEN DIESER VERSION
+Rekonstruiert werden bis zu 24 rechteckige Holzteile mit rechtwinkligen Enden. Schräg eingebaute Bretter sind möglich; deren Einbauwinkel ist keine Sägegehrung. Rundungen, Profile, Gehrungen, verdeckte Beschläge und Traglasten werden nicht automatisch verlässlich abgeleitet. Fehlende Maße oder sich überschneidende Holzkörper verhindern die Anleitungserstellung. Das 3D-Modell zeigt Rohteile; die Bildanleitung zeigt Bohrungen einzeln mit Kantendistanzen. Blindbohrtiefen enthalten die Bohrerspitze und müssen zum tatsächlichen Beschlag passen.
+
+Das Holzbaum-Beispiel enthält die im Foto sichtbaren Längen 300 / 350 / 350 / 350 / 400 / 400 mm als unbestätigte Fotoangaben. Es enthält keine automatisch geprüften Originalverbindungen. Der optionale Baumaufbau ergänzt eine eigene Rückenleiste und einen Kreuzfuß; das ist ein Konstruktionsvorschlag.
+
+Der Ablauf und die API-Schnittstelle wurden mit Testdaten geprüft. Ein echter OpenAI-Bildaufruf und ein Probebau stehen ohne deinen API-Schlüssel bzw. bestätigte Maße noch aus.

@@ -10,7 +10,7 @@ const arrow=(a,b)=>ln(a,b,{color:accent,width:3,'marker-end':'url(#move)'});
 const mark=p=>`<g data-mark="center">${ln([p[0]-8,p[1]],[p[0]+8,p[1]],{color:accent})}${ln([p[0],p[1]-8],[p[0],p[1]+8],{color:accent})}<circle cx="${p[0]}" cy="${p[1]}" r="12" fill="none" stroke="${accent}" stroke-width="1.6"/></g>`;
 const dim=(p,q,label,{x=(p[0]+q[0])/2,y=(p[1]+q[1])/2-13,size=24}={})=>ln(p,q,{width:1.4,'marker-start':'url(#dim)','marker-end':'url(#dim)'})+`<rect x="${x-label.length*size*.27-7}" y="${y-size}" width="${label.length*size*.54+14}" height="${size+6}" fill="#fff"/>`+txt(x,y,label,size,ink,'middle');
 const dot=(x,y,s)=>`<circle cx="${x}" cy="${y}" r="22" fill="${ink}"/>`+txt(x,y+8,s,21,'#fff','middle');
-export const partProjection=(x,y,z)=>[x+.42*y,.70*y-.90*z];
+export const partProjection=(x,y,z)=>[(x+y)/Math.sqrt(2),(-x+y-2*z)/Math.sqrt(6)];
 export function partBlockGeometry(w,d,t){
  // The viewing ray is (-.42, 1, .70/.90): left, front and top are visible.
  return [
@@ -19,11 +19,15 @@ export function partBlockGeometry(w,d,t){
   {face:'top',normal:[0,0,1],points:[[0,0,t],[w,0,t],[w,d,t],[0,d,t]]}
  ];
 }
-function partBoard(w,d,t,{x=105,y=270,maxW=955,maxH=270}={}){
- const s=Math.min(maxW/(w+.42*d),maxH/(.7*d+.9*t));
- const p=(X,Y,Z=t)=>{const v=partProjection(X,Y,Z);return [x+s*v[0],y+s*v[1]];};
- const art=partBlockGeometry(w,d,t).map(({face,points})=>`<g data-face="${face}">${pg(points.map(q=>p(...q)),{left:'#e6e9e1',front:'#f0f2ec',top:'#fff'}[face])}</g>`).join('');
- return {w,d,t,s,p,art};
+function partBoard(w,d,t,{x=105,y=270,maxW=955,maxH=270,view='plan'}={}){
+ if(view==='isometric'){
+  const raw=partBlockGeometry(w,d,t).flatMap(f=>f.points).map(q=>partProjection(...q)),min=[0,1].map(i=>Math.min(...raw.map(p=>p[i]))),max=[0,1].map(i=>Math.max(...raw.map(p=>p[i]))),s=Math.min(maxW/(max[0]-min[0]),maxH/(max[1]-min[1]));
+  const p=(X,Y,Z=t)=>{const q=partProjection(X,Y,Z);return [x+s*(q[0]-min[0]),y+s*(q[1]-min[1])];};
+  return {w,d,t,s,p,art:partBlockGeometry(w,d,t).map(({face,points})=>`<g data-face="${face}">${pg(points.map(q=>p(...q)),{left:'#e6e9e1',front:'#f0f2ec',top:'#fff'}[face])}</g>`).join('')};
+ }
+ // Dimensioned working views are normal to the selected face: rectangles stay rectangles.
+ const s=Math.min(maxW/w,maxH/(view==='edge'?t:d)),p=(X,Y,Z=t)=>[x+s*X,y+s*(view==='edge'?t-Z:Y)],height=view==='edge'?t:d;
+ return {w,d,t,s,p,art:`<g data-face="orthographic-${view}">${pg([[x,y],[x+w*s,y],[x+w*s,y+height*s],[x,y+height*s]])}</g>`};
 }
 function dimensionRow(b,xs,{front=false}={}){
  const all=[0,...xs,b.w],edge=front?b.d:0,z=front?0:b.t,row=b.p(0,edge,z)[1]+(front?58:-55);let a='';
@@ -61,7 +65,7 @@ function baselineDimensions(b,rows,{edge=false,top=200,yDimensions=false}={}){
  return out;
 }
 function axisDetail(c,face,rows){
- const t=c.dimensions.thickness,b=partBoard(65,30,t,{x:125,y:610,maxW:300,maxH:95}),ids=rows.map(r=>r.id).join(' ');
+ const t=c.dimensions.thickness,b=partBoard(65,30,t,{x:125,y:575,maxW:300,maxH:95,view:'isometric'}),ids=rows.map(r=>r.id).join(' ');
  let out=box2(60,505,420,200,'#fafbf7')+txt(80,534,'Detail · '+rows.map(r=>r.id).join(' / '),21)+b.art;
  const point=face?b.p(35,c.axis):b.p(35,b.d,c.axis),start=face?b.p(35,0):b.p(35,b.d,t);
  const P=face?[95,start[1]]:[point[0]+100,start[1]],Q=face?[95+point[0]-start[0],point[1]]:[point[0]+100,point[1]];
@@ -75,7 +79,6 @@ function cutPart(c,shelf){
  const {width:w,height:h,depth:d,thickness:t}=c.dimensions,depth=shelf?d:h;
  const b=partBoard(w,depth,t,{y:300,maxH:300});let a=b.art+dimensionRow(b,[]);
  const p=b.p(w,0),q=b.p(w,depth);a+=ln(p,[p[0]+40,p[1]],{color:muted,width:1})+ln(q,[q[0]+40,q[1]],{color:muted,width:1})+dim([p[0]+40,p[1]],[q[0]+40,q[1]],f(depth),{x:(p[0]+q[0])/2+78,y:(p[1]+q[1])/2+8});
- const mid=b.p(w*.18,depth,0);a+=dim([mid[0]-28,mid[1]],[mid[0]-28,mid[1]-.9*t*b.s],f(t),{x:mid[0]-65,y:mid[1]-2,size:22});
  a+=dot(105,150,shelf?'02':'01')+txt(140,158,'1×',25)+txt(600,650,[w,depth,t].map(f).join(' × ')+' mm',34,ink,'middle');return a;
 }
 function pocketTable(c,face){
@@ -85,11 +88,11 @@ function pocketTable(c,face){
  return out+txt(85,740,'DF 500 Q · D 4 · h '+f(c.axis)+' · 90° · 20 → 10 mm',23);
 }
 function millPart(c,face,finished){
- const {width:w,height:h,depth:d,thickness:t}=c.dimensions,depth=face?d:h,b=partBoard(w,depth,t,{x:160,y:345,maxW:890,maxH:135}),rows=c.pockets.filter(r=>r.part===(face?'02':'01'));let out=b.art;
+ const {width:w,height:h,depth:d,thickness:t}=c.dimensions,depth=face?d:h,b=partBoard(w,depth,t,{x:160,y:345,maxW:890,maxH:135,view:face?'plan':'edge'}),rows=c.pockets.filter(r=>r.part===(face?'02':'01'));let out=b.art;
  out+=ln(face?b.p(0,c.axis):b.p(0,depth,c.axis),face?b.p(w,c.axis):b.p(w,depth,c.axis),{color:accent,dash:true,width:2.5});
  for(const r of rows){const p=face?b.p(r.x,c.axis):b.p(r.x,depth,c.axis);out+=ln(b.p(r.x,0),b.p(r.x,depth),{color:muted,dash:true,width:1});if(!face)out+=ln(b.p(r.x,depth),b.p(r.x,depth,0),{color:muted,dash:true,width:1});out+=finished?pocket(b,r.x,face?c.axis:depth,face?t:c.axis,r.width,!face):mark(p);out+=txt(p[0]+14,p[1]+27,r.id,20,accent);}
  out+=baselineDimensions(b,rows,{edge:!face,top:190});
- out+=dot(105,140,face?'02':'01')+txt(145,148,face?'Unterseite':'Rückseite',28)+txt(138,b.p(0,0)[1]-10,'links',20,accent,'end')+axisDetail(c,face,rows)+pocketTable(c,face);return out;
+ out+=dot(105,140,face?'02':'01')+txt(145,148,face?'Unterseite':'Obere Schmalkante',28)+txt(138,b.p(0,0)[1]-10,'links',20,accent,'end')+axisDetail(c,face,rows)+pocketTable(c,face);return out;
 }
 function drillPart(c,hookIndex){
  const detail=hookIndex!==undefined,{width:w,height:h,thickness:t}=c.dimensions,b=partBoard(w,h,t,{x:250,y:305,maxW:800,maxH:140}),hookRows=detail?c.hookBores.filter(r=>r.hookIndex===hookIndex):c.hookBores,wallRows=detail?[]:c.boardBores;
@@ -112,8 +115,9 @@ function drillPart(c,hookIndex){
 }
 function assembled(c,{lift=0,dowels=false,finished=false,labels=false,overview=false}={}){
  const {width:w,height:h,depth:d,thickness:t}=c.dimensions;
- const s=Math.min(880/(w+.42*d),420/(.9*(h+t+lift)+.7*d)),x0=(1200-s*(w+.42*d))/2,y0=550;
- const p=(X,Y,Z)=>{const q=partProjection(X,Y,Z);return [x0+s*q[0],y0+s*q[1]];};
+ const box=[[0,0,0],[w,0,0],[0,d+95,0],[w,d+95,0],[0,0,h+t+lift],[w,0,h+t+lift],[0,d+95,h+t+lift],[w,d+95,h+t+lift]].map(q=>partProjection(...q));
+ const lo=[0,1].map(i=>Math.min(...box.map(q=>q[i]))),hi=[0,1].map(i=>Math.max(...box.map(q=>q[i]))),s=Math.min(820/(hi[0]-lo[0]),400/(hi[1]-lo[1]));
+ const p=(X,Y,Z)=>{const q=partProjection(X,Y,Z);return [600+s*(q[0]-(lo[0]+hi[0])/2),440+s*(q[1]-(lo[1]+hi[1])/2)];};
  function block(X,Y,Z,W,D,H){return partBlockGeometry(W,D,H).map(({face,points})=>`<g data-face="${face}">${pg(points.map(([x,y,z])=>p(X+x,Y+y,Z+z)),{left:'#e6e9e1',front:'#f0f2ec',top:'#fff'}[face])}</g>`).join('');}
  let a=block(0,0,0,w,t,h);
  for(const x of c.positions){if(dowels)a+=block(x-8.5,t/2-2,h-10,17,4,20);if(lift)a+=ln(p(x,t/2,h+10),p(x,t/2,h+lift),{color:accent,dash:true});}
@@ -149,7 +153,7 @@ export function workshopSVG(c,step){
   case 'finished':a=assembled(c,{finished:true});break;
   default:throw Error('Unbekannter Bildschritt: '+step.figure);
  }
- return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" data-illustration="workpiece-only" data-projection="shared-oblique" aria-label="${esc(step.title)}"><title>${esc(step.title)}</title><defs><marker id="move" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="${accent}"/></marker><marker id="dim" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M10 0L0 5L10 10" fill="none" stroke="${ink}" stroke-width="1.4"/></marker></defs><rect width="1200" height="800" fill="#fff"/>${txt(40,82,String(i).padStart(2,'0'),62)}${txt(140,79,step.title,33)}${txt(1160,44,step.phase,17,muted,'end')}${a}${ln([40,758],[1160,758],{color:'#dce0d6',width:1})}${txt(45,787,'mm',19,muted)}${txt(1155,787,'ENTWURF',15,muted,'end')}</svg>`;
+ return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" data-illustration="workpiece-only" data-projection="orthographic" aria-label="${esc(step.title)}"><title>${esc(step.title)}</title><defs><marker id="move" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="${accent}"/></marker><marker id="dim" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M10 0L0 5L10 10" fill="none" stroke="${ink}" stroke-width="1.4"/></marker></defs><rect width="1200" height="800" fill="#fff"/>${txt(40,82,String(i).padStart(2,'0'),62)}${txt(140,79,step.title,33)}${txt(1160,44,step.phase,17,muted,'end')}${a}${ln([40,758],[1160,758],{color:'#dce0d6',width:1})}${txt(45,787,'mm',19,muted)}${txt(1155,787,'ENTWURF',15,muted,'end')}</svg>`;
 }
 export async function workshopPNG(course,step){
  const url=URL.createObjectURL(new Blob([workshopSVG(course,step)],{type:'image/svg+xml'}));

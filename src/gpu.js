@@ -1,3 +1,4 @@
+import {rotatePoint} from './geometry.js';
 // One shared depth-buffered renderer, composited onto each viewer's accessible 2D canvas.
 // Keeping the output canvas 2D also makes the exact same views available to PDF export.
 const gpuFaceIndices=[[0,3,2,1],[4,5,6,7],[0,1,5,4],[3,7,6,2],[0,4,7,3],[1,2,6,5]];
@@ -22,11 +23,11 @@ export function drawGpu(viewer,visibleParts){
  for(const part of visibleParts){
   const [a,b,d]=part.size.map(n=>n/2),center=part.center.map((n,i)=>n+part.explode[i]*viewer.explode),r=part.rotationZ||0;
   const local=[[-a,-b,-d],[a,-b,-d],[a,b,-d],[-a,b,-d],[-a,-b,d],[a,-b,d],[a,b,d],[-a,b,d]];
-  const points=local.map(v=>viewer.project([v[0]*Math.cos(r)-v[1]*Math.sin(r)+center[0],v[0]*Math.sin(r)+v[1]*Math.cos(r)+center[1],v[2]+center[2]]));
+  const points=local.map(v=>viewer.project(rotatePoint(v,part).map((n,i)=>n+center[i])));
   const vertices=[];
   for(let face=0;face<6;face++){const ids=gpuFaceIndices[face],col=color(part.id===viewer.selected?'#bf6742':part.color||colors[face]);for(const j of[0,1,2,0,2,3]){const id=ids[j],p=points[id],l=local[id],grain=face<2?[l[0],l[1]]:face<4?[l[0],l[2]]:[l[2],l[1]];vertices.push(p[0]/viewer.w*2-1,1-p[1]/viewer.h*2,-p[2]/(extent*5),...col,l[0],l[1],...grain,face);}}
   // Dark cylindrical inner surfaces keep drilled openings legible from oblique views.
-  for(const hole of part.holes||[]){for(let k=0;k<28;k++){const q0=k/28*Math.PI*2,q1=(k+1)/28*Math.PI*2;const ring=[[hole.x+Math.cos(q0)*hole.r,hole.y+Math.sin(q0)*hole.r,-d],[hole.x+Math.cos(q1)*hole.r,hole.y+Math.sin(q1)*hole.r,-d],[hole.x+Math.cos(q1)*hole.r,hole.y+Math.sin(q1)*hole.r,d],[hole.x+Math.cos(q0)*hole.r,hole.y+Math.sin(q0)*hole.r,d]];for(const i of[0,1,2,0,2,3]){const l=ring[i],p=viewer.project([l[0]*Math.cos(r)-l[1]*Math.sin(r)+center[0],l[0]*Math.sin(r)+l[1]*Math.cos(r)+center[1],l[2]+center[2]]);vertices.push(p[0]/viewer.w*2-1,1-p[1]/viewer.h*2,-p[2]/(extent*5),.34,.27,.15,l[0],l[1],l[0],l[1],7);}}}
+  for(const hole of part.holes||[]){for(let k=0;k<28;k++){const q0=k/28*Math.PI*2,q1=(k+1)/28*Math.PI*2;const ring=[[hole.x+Math.cos(q0)*hole.r,hole.y+Math.sin(q0)*hole.r,-d],[hole.x+Math.cos(q1)*hole.r,hole.y+Math.sin(q1)*hole.r,-d],[hole.x+Math.cos(q1)*hole.r,hole.y+Math.sin(q1)*hole.r,d],[hole.x+Math.cos(q0)*hole.r,hole.y+Math.sin(q0)*hole.r,d]];for(const i of[0,1,2,0,2,3]){const l=ring[i],p=viewer.project(rotatePoint(l,part).map((n,i)=>n+center[i]));vertices.push(p[0]/viewer.w*2-1,1-p[1]/viewer.h*2,-p[2]/(extent*5),.34,.27,.15,l[0],l[1],l[0],l[1],7);}}}
   for(let i=0;i<2;i++){const h=part.holes?.[i];gl.uniform3f(locations['hole'+i],h?.x||0,h?.y||0,h?.r||0);}gl.uniform1f(locations.wooden,part.cut?1:0);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(vertices),gl.DYNAMIC_DRAW);gl.drawArrays(gl.TRIANGLES,0,vertices.length/11);
  }
  viewer.ctx.drawImage(canvas,0,0,viewer.w,viewer.h);return true;

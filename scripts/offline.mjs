@@ -2,7 +2,7 @@ import {readFile,writeFile} from 'node:fs/promises';import {fileURLToPath} from 
 const root=fileURLToPath(new URL('../',import.meta.url)),read=p=>readFile(path.join(root,p),'utf8');
 let html=await read('index.html');
 const css=await read('src/styles.css'),svg=Buffer.from(await read('mark.svg')).toString('base64');
-const js=(await Promise.all(['src/projects.js','src/core.js','src/gpu.js','src/viewer.js','src/workshop.js','src/workshop-art.js','src/workshop-ui.js','src/pdf.js','src/app.js'].map(read))).map(s=>s.replace(/^import .*?;\n/gm,'').replace(/^export \{.*?\};?\n/gm,'').replaceAll('export ','')).join('\n');
+const js=(await Promise.all(['src/projects.js','src/core.js','src/geometry.js','src/gpu.js','src/viewer.js','src/workshop.js','src/workshop-art.js','src/workshop-ui.js','src/pdf.js','src/photo-model.js','src/photo-art.js','src/photo-ui.js','src/app.js'].map(read))).map(s=>s.replace(/^import .*?;\n/gm,'').replace(/^export \{.*?\};?\n/gm,'').replaceAll('export ','')).join('\n');
 html=html.replace('<link rel="stylesheet" href="./src/styles.css">',()=>`<style>${css}</style>`).replaceAll('./mark.svg','data:image/svg+xml;base64,'+svg);
 html=html.replace(/<script src="\.\/config.js"><\/script><script defer src="\.\/vendor\/pdf-lib.min.js"><\/script><script type="module" src="\.\/src\/app.js"><\/script>/,'');
 const scripts=`<script>${await read('config.js')}</script><script>${(await read('vendor/pdf-lib.min.js')).replaceAll('</script','<\\/script')}</script><script>${js.replaceAll('</script','<\\/script')}</script>`;
